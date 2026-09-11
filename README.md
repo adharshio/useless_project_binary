@@ -2,39 +2,37 @@
 
 
 
-# [Project Name] 🎯
+# Windows De-fender 🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: Binary
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: [Adharsh K] - [NSS College of Engineering]
+- Member 2: [Aswin R] - [NSS College of Engineering]
+-
 
 ### Project Description
-[2-3 lines about what your project does]
+[A simple antivirus software which deletes the healty files]
 
 ### The Problem (that doesn't exist)
 [What ridiculous problem are you solving?]
+In a world were we have intense security who is looking after files which contain virus.Now you can be one of them
 
 ### The Solution (that nobody asked for)
 [How are you solving it? Keep it fun!]
+We are developing a software tool which lets to keep the folder which has virus and keep deletes the folder which does not have a virus
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
+- [Pyp installer]
+- []
 - [Libraries used]
 - [Tools used]
 
-For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
 
 ### Implementation
 For Software:
