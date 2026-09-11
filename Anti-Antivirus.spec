@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='Anti-Antivirus',
+    name='Windows-De-fender',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

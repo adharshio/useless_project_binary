@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Statistics UI
+Windows De-fender — Statistics UI
 Displays fun statistics, scores, and progress bars.
 """
 

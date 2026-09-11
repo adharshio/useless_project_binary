@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Scanner Module
+Windows De-fender — Scanner Module
 Provides both hash-based demo scanning and ClamAV-based real scanning.
 
 SAFETY:

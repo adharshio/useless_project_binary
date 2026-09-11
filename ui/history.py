@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Scan History UI
+Windows De-fender — Scan History UI
 Displays complete scan history in a scrollable table.
 """
 

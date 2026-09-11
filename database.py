@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Database Module
+Windows De-fender — Database Module
 Manages SQLite scan history, museum records, and statistics.
 """
 

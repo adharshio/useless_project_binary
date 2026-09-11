@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Dashboard UI
+Windows De-fender — Dashboard UI
 Main dashboard with stats cards, title, tagline, and scan button.
 """
 

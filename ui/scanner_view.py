@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Scanner View UI
+Windows De-fender — Scanner View UI
 File scanning interface with animation, progress bar, and funny results.
 """
 

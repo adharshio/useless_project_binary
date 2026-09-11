@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Malware Museum UI
+Windows De-fender — Malware Museum UI
 Displays all preserved demo threats in a table format.
 """
 

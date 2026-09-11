@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Main Application Window
+Windows De-fender — Main Application Window
 Assembles all UI components with sidebar navigation.
 """
 
@@ -19,8 +19,11 @@ from ui.museum import MuseumFrame
 from ui.history import HistoryFrame
 
 
-class AntiAntivirusApp(ctk.CTk):
-    """Main application window for Anti-Antivirus."""
+class WindowsDefenderApp(ctk.CTk):
+    """Main application window for Windows De-fender."""
+
+# Alias for backwards compatibility
+AntiAntivirusApp = WindowsDefenderApp
 
     def __init__(self):
         super().__init__()
