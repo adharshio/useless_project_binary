@@ -4,11 +4,17 @@ Manages SQLite scan history, museum records, scan sessions, and statistics.
 """
 
 import sqlite3
+import sys
 from pathlib import Path
 from datetime import datetime
 
 # Database path inside the application data directory
-DB_DIR = Path(__file__).parent / "data"
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).parent
+else:
+    BASE_DIR = Path(__file__).parent
+
+DB_DIR = BASE_DIR / "data"
 DB_PATH = DB_DIR / "anti_antivirus.db"
 
 

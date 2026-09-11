@@ -42,6 +42,7 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.selected_target = ""
         self.discovered_files = []
         self.is_scanning = False
+        self._abort_scan = False
 
         self._build_ui()
         self._update_clamav_status()
@@ -114,6 +115,9 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.path_entry.pack(side="left", fill="x", expand=True, padx=4)
         self.path_entry.bind("<KeyRelease>", self._on_path_typed)
         self.path_entry.bind("<Return>", self._on_path_typed)
+        self.path_entry.bind("<FocusOut>", self._on_path_typed)
+        self.path_entry.bind("<<Paste>>", lambda e: self.after(50, self._on_path_typed))
+        self.path_entry.bind("<ButtonRelease-1>", self._on_path_typed)
 
         self.browse_btn = ctk.CTkButton(
             path_row,
@@ -217,8 +221,8 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.pct_lbl.pack(side="right")
 
         # ── Authentic Windows Segmented Blue Moving Progress Bar ──
-        self.classic_pbar = ClassicProgressBar(progress_group, width=800, height=22)
-        self.classic_pbar.pack(fill="x", padx=6, pady=(2, 4))
+        self.classic_pbar = ClassicProgressBar(progress_group, width=900, height=26)
+        self.classic_pbar.pack(fill="x", padx=4, pady=(2, 4), expand=True)
 
         stats_row = ctk.CTkFrame(progress_group, fg_color="transparent")
         stats_row.pack(fill="x", padx=6, pady=(0, 4))
@@ -372,8 +376,8 @@ class ScannerViewFrame(ctk.CTkFrame):
             message=msg,
             buttons=buttons,
             show_progress=False,
-            width=380,
-            height=185,
+            width=320,
+            height=140,
         )
         self.winfo_toplevel().wait_window(dialog)
 
@@ -384,41 +388,26 @@ class ScannerViewFrame(ctk.CTkFrame):
             self._log("ℹ Comic dialog closed via OK.")
 
     def _start_scan_flow(self):
-        """Show retro error dialog matching user image before executing."""
+        """Start the anti-scan directly when user clicks START ANTI-SCAN."""
         if self.is_scanning or not self.discovered_files:
             return
 
-        # ── Show Retro Warning Dialog (matching user's reference image!) ──
-        count = len(self.discovered_files)
-        msg = (
-            f"Anti-Antivirus detected {count} file(s) in target folder.\n\n"
-            "Clean safe files will be DESTROYED.\n"
-            "Detected threats will be PRESERVED.\n\n"
-            'Click "Fix" to execute Anti-Scan.'
-        )
+        # Start scanning immediately — no blocking confirmation dialog
+        self._execute_scan()
 
-        buttons = [
-            ("Fix", "ok", True, "normal"),
-            ("Cancel", "cancel", False, "normal"),
-            ("Ignore", "ignore", False, "disabled"),
-        ]
-
-        proceed = show_retro_alert(
-            self.winfo_toplevel(),
-            title="Error",
-            message=msg,
-            buttons=buttons,
-        )
-
-        if not proceed:
-            return
-
-        # Trigger comic green-blocks purge modal first, then run actual scan
-        show_comic_purge_modal(self.winfo_toplevel(), on_complete=self._execute_scan)
+    def abort_scan(self):
+        """Signal scanner thread to stop and stop animations immediately."""
+        self._abort_scan = True
+        self.is_scanning = False
+        try:
+            self.classic_pbar.stop_marquee()
+        except Exception:
+            pass
 
     def _execute_scan(self):
         """Run scanning with classic moving blue blocks progress bar in background."""
         self.is_scanning = True
+        self._abort_scan = False
         self.browse_btn.configure(state="disabled")
         self.browse_file_btn.configure(state="disabled")
         self.start_btn.configure(state="disabled")
@@ -447,10 +436,14 @@ class ScannerViewFrame(ctk.CTkFrame):
         errors = 0
 
         for i, filepath in enumerate(files):
+            if self._abort_scan:
+                return
+
             filename = os.path.basename(filepath)
 
             # Update live GUI labels
-            self.after(0, self._update_progress_labels, i, total, filename, threats, destroyed, errors)
+            if not self._abort_scan:
+                self.after(0, self._update_progress_labels, i + 1, total, filename, threats, destroyed, errors)
 
             # Scan with ClamAV
             try:
@@ -469,6 +462,9 @@ class ScannerViewFrame(ctk.CTkFrame):
                     "return_code": None,
                 }
 
+            if self._abort_scan:
+                return
+
             status = result.get("status") or result.get("result", "ERROR")
             threat_name = result.get("threat") or result.get("threat_name") or ""
             file_hash = result.get("sha256", "")
@@ -479,27 +475,32 @@ class ScannerViewFrame(ctk.CTkFrame):
                     move_to_deleted(filepath)
                     action = "DESTROYED"
                     destroyed += 1
-                    self.after(0, self._log, f"💀 [CLEAN -> DESTROYED] {filename}")
+                    if not self._abort_scan:
+                        self.after(0, self._log, f"💀 [CLEAN -> DESTROYED] {filename}")
                 except Exception as e:
                     action = "SKIPPED"
                     errors += 1
-                    self.after(0, self._log, f"⚠ [ERROR] Could not move {filename}: {e}")
+                    if not self._abort_scan:
+                        self.after(0, self._log, f"⚠ [ERROR] Could not move {filename}: {e}")
 
             elif status == "INFECTED":
                 try:
                     move_to_museum(filepath)
                     action = "PRESERVED"
                     threats += 1
-                    self.after(0, self._log, f"🏆 [INFECTED -> PRESERVED] {filename} => {threat_name}")
+                    if not self._abort_scan:
+                        self.after(0, self._log, f"🏆 [INFECTED -> PRESERVED] {filename} => {threat_name}")
                 except Exception as e:
                     action = "SKIPPED"
                     errors += 1
-                    self.after(0, self._log, f"⚠ [ERROR] Could not preserve {filename}: {e}")
+                    if not self._abort_scan:
+                        self.after(0, self._log, f"⚠ [ERROR] Could not preserve {filename}: {e}")
 
             else:
                 action = "SKIPPED"
                 errors += 1
-                self.after(0, self._log, f"⚠ [SKIPPED] {filename} => {result.get('output', 'Scan error')}")
+                if not self._abort_scan:
+                    self.after(0, self._log, f"⚠ [SKIPPED] {filename} => {result.get('output', 'Scan error')}")
 
             # Database audit
             try:
@@ -514,9 +515,21 @@ class ScannerViewFrame(ctk.CTkFrame):
             except Exception:
                 pass
 
-            # Small delay for smooth retro visual effect
-            if total < 25:
+            if self._abort_scan:
+                return
+
+            # Pacing delay so user visibly sees the blue strip sweeping through the white bar
+            if total <= 3:
+                time.sleep(0.4)
+            elif total <= 10:
+                time.sleep(0.2)
+            elif total <= 30:
                 time.sleep(0.08)
+            else:
+                time.sleep(0.03)
+
+        if self._abort_scan:
+            return
 
         # Record session
         try:
@@ -525,7 +538,8 @@ class ScannerViewFrame(ctk.CTkFrame):
             pass
 
         # Conclude scan
-        self.after(0, self._conclude_scan, total, threats, destroyed, errors)
+        if not self._abort_scan:
+            self.after(0, self._conclude_scan, total, threats, destroyed, errors)
 
     def _update_progress_labels(self, current, total, filename, threats, destroyed, errors):
         """Update live status labels and determinate blocks."""

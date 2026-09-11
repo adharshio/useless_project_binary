@@ -12,10 +12,16 @@ SAFETY:
 
 import shutil
 import os
+import sys
 from pathlib import Path
 
 # Application directories
-DATA_DIR = Path(__file__).parent / "data"
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).parent
+else:
+    BASE_DIR = Path(__file__).parent
+
+DATA_DIR = BASE_DIR / "data"
 DELETED_DIR = DATA_DIR / "deleted_safe_files"
 MUSEUM_DIR = DATA_DIR / "threat_museum"
 
@@ -113,8 +119,8 @@ def move_to_museum(filepath: str) -> str:
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     dest = _unique_name(dest_dir, source.name)
-    # Move the file into museum so it is quarantined in the controlled area
-    shutil.move(str(source), str(dest))
+    # Copy the file into museum so it is preserved in both the original folder and museum vault
+    shutil.copy2(str(source), str(dest))
     return str(dest)
 
 

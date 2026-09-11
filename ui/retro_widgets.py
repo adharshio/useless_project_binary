@@ -326,15 +326,16 @@ class RetroTitleBar(tk.Canvas):
 
 def draw_pixel_error_icon(canvas: tk.Canvas, size=64):
     """
-    Draw an authentic roughly 64x64px circular red error icon with white 'X' inside,
+    Draw an authentic circular red error icon with white 'X' inside,
     specifically styled with a classic pixelated/low-res feel.
+    Scales smoothly with the size parameter.
     """
     canvas.delete("all")
     w = size
     h = size
     cx = w // 2
     cy = h // 2
-    r = (min(w, h) // 2) - 4
+    r = max(6, (min(w, h) // 2) - 3)
 
     # Outer dark outline / shadow for chunky retro look
     canvas.create_oval(cx - r - 1, cy - r - 1, cx + r + 1, cy + r + 1, fill="#800000", outline="#400000", width=1)
@@ -345,18 +346,20 @@ def draw_pixel_error_icon(canvas: tk.Canvas, size=64):
     # Subtle inner bevel highlight on top/left of circle
     canvas.create_arc(
         cx - r + 2, cy - r + 2, cx + r - 2, cy + r - 2,
-        start=45, extent=180, outline="#F87070", width=2, style="arc"
+        start=45, extent=180, outline="#F87070", width=max(1, int(size * 0.03)), style="arc"
     )
 
     # Chunky pixelated White 'X'
-    arm = r - 10
+    arm = max(4, int(r * 0.62))
+    line_w = max(3, int(size * 0.11))
+
     # Shadow for pixel cross
-    canvas.create_line(cx - arm + 1, cy - arm + 2, cx + arm + 1, cy + arm + 2, fill="#700000", width=7, capstyle="projecting")
-    canvas.create_line(cx + arm + 1, cy - arm + 2, cx - arm + 1, cy + arm + 2, fill="#700000", width=7, capstyle="projecting")
+    canvas.create_line(cx - arm + 1, cy - arm + 2, cx + arm + 1, cy + arm + 2, fill="#700000", width=line_w, capstyle="projecting")
+    canvas.create_line(cx + arm + 1, cy - arm + 2, cx - arm + 1, cy + arm + 2, fill="#700000", width=line_w, capstyle="projecting")
 
     # Bright white cross body
-    canvas.create_line(cx - arm, cy - arm, cx + arm, cy + arm, fill=WIN_WHITE, width=7, capstyle="projecting")
-    canvas.create_line(cx + arm, cy - arm, cx - arm, cy + arm, fill=WIN_WHITE, width=7, capstyle="projecting")
+    canvas.create_line(cx - arm, cy - arm, cx + arm, cy + arm, fill=WIN_WHITE, width=line_w, capstyle="projecting")
+    canvas.create_line(cx + arm, cy - arm, cx - arm, cy + arm, fill=WIN_WHITE, width=line_w, capstyle="projecting")
 
 
 class RetroSegmentedProgressBar(tk.Canvas):
@@ -478,35 +481,38 @@ class RetroSegmentedProgressBar(tk.Canvas):
         self.create_line(w - 1, 0, w - 1, h, fill=WIN_BORDER_LIGHT)
 
         step = self.block_w + self.block_gap
-        num_blocks = 8  # Wide blue strip sweeps across
+        num_blocks = 10  # Wide prominent blue strip sweeping through the white bar
 
         for i in range(num_blocks):
-            x1 = self.marquee_pos + i * step
-            if 3 <= x1 < w - 3:
-                x2 = min(x1 + self.block_w, w - 3)
+            raw_x1 = self.marquee_pos + i * step
+            raw_x2 = raw_x1 + self.block_w
+            if raw_x2 > 3 and raw_x1 < w - 3:
+                x1 = max(3, raw_x1)
+                x2 = min(w - 3, raw_x2)
                 y1 = 3
                 y2 = h - 3
-                self.create_rectangle(x1, y1, x2, y2, fill=self.chunk_color, outline="")
-                self.create_line(x1, y1, x2 - 1, y1, fill=self.chunk_light)
-                self.create_line(x1, y1, x1, y2 - 1, fill=self.chunk_light)
-                self.create_line(x1, y2 - 1, x2, y2 - 1, fill=self.chunk_shadow)
-                self.create_line(x2 - 1, y1, x2 - 1, y2, fill=self.chunk_shadow)
+                if x2 > x1:
+                    self.create_rectangle(x1, y1, x2, y2, fill=self.chunk_color, outline="")
+                    self.create_line(x1, y1, x2 - 1, y1, fill=self.chunk_light)
+                    self.create_line(x1, y1, x1, y2 - 1, fill=self.chunk_light)
+                    self.create_line(x1, y2 - 1, x2, y2 - 1, fill=self.chunk_shadow)
+                    self.create_line(x2 - 1, y1, x2 - 1, y2, fill=self.chunk_shadow)
 
-        self.marquee_pos += 5
+        self.marquee_pos += 6
         if self.marquee_pos > w:
             self.marquee_pos = - (num_blocks * step)
 
-        self.marquee_timer = self.after(30, self._animate_marquee)
+        self.marquee_timer = self.after(25, self._animate_marquee)
 
 
 class ClassicProgressBar(RetroSegmentedProgressBar):
     """Backwards-compatible segmented blue blocks progress bar."""
-    def __init__(self, parent, width=360, height=20, **kwargs):
+    def __init__(self, parent, width=360, height=26, **kwargs):
         super().__init__(
             parent, width=width, height=height,
-            chunk_color=WIN_BLOCK_BLUE,
-            chunk_light="#6EA8F7",
-            chunk_shadow=WIN_BLOCK_SHADOW,
+            chunk_color="#0055EA",
+            chunk_light="#75B4FF",
+            chunk_shadow="#0A3C96",
             **kwargs
         )
 
@@ -518,11 +524,11 @@ class RetroDialog(tk.Toplevel):
     - Gradient blue title bar (#0A246A to #A6CAF0) with draggable support
     - White bold title text and square beveled [X] close button
     - Window body: light beige/grey background (#ECE9D8)
-    - 64x64px pixelated low-res circular red X icon
+    - Pixelated circular red X icon
     - Message text in Tahoma (plain sans-serif)
     - Beveled 3D buttons (raised look, dark outer border, light inner highlight)
     - Greyed-out/disabled state in flat-grey with light-grey text
-    - Optional green segmented-block progress bar
+    - Optional blue/green segmented-block progress bar
     """
 
     def __init__(
@@ -533,8 +539,8 @@ class RetroDialog(tk.Toplevel):
         buttons=None,
         show_progress=False,
         progress_val=0.0,
-        width=380,
-        height=185,
+        width=320,
+        height=140,
     ):
         super().__init__(parent)
         self.parent = parent
@@ -568,43 +574,43 @@ class RetroDialog(tk.Toplevel):
             self.content_container,
             title=title,
             close_command=self._on_close,
-            height=26
+            height=22
         )
         self.title_bar.pack(fill="x", padx=1, pady=(1, 2))
 
         # ── Window Body ──
         self.body_frame = tk.Frame(self.content_container, bg=WIN_BG, bd=0)
-        self.body_frame.pack(fill="both", expand=True, padx=8, pady=6)
+        self.body_frame.pack(fill="both", expand=True, padx=6, pady=4)
 
         # Content Row (Icon + Message)
         top_row = tk.Frame(self.body_frame, bg=WIN_BG)
-        top_row.pack(fill="x", pady=(2, 4))
+        top_row.pack(fill="x", pady=(2, 2))
 
-        # 64x64 Pixelated Circular Red X Icon
-        self.icon_canvas = tk.Canvas(top_row, width=48, height=48, bg=WIN_BG, highlightthickness=0)
-        self.icon_canvas.pack(side="left", padx=(4, 10), anchor="n")
-        draw_pixel_error_icon(self.icon_canvas, size=48)
+        # Pixelated Circular Red X Icon
+        self.icon_canvas = tk.Canvas(top_row, width=36, height=36, bg=WIN_BG, highlightthickness=0)
+        self.icon_canvas.pack(side="left", padx=(2, 8), anchor="n")
+        draw_pixel_error_icon(self.icon_canvas, size=36)
 
         # Tahoma Message Text
         self.msg_label = tk.Label(
             top_row,
             text=message,
-            font=("Tahoma", 9),
+            font=("Tahoma", 8),
             bg=WIN_BG,
             fg=WIN_TEXT,
             justify="left",
-            wraplength=260,
+            wraplength=240,
             anchor="w",
         )
         self.msg_label.pack(side="left", fill="both", expand=True, anchor="w")
 
-        # Optional Green Segmented Progress Bar
+        # Optional Blue Segmented Progress Bar
         self.pbar = None
         if self.show_progress:
             prog_box = tk.Frame(self.body_frame, bg=WIN_BG)
-            prog_box.pack(fill="x", pady=(6, 4))
-            self.pbar = RetroSegmentedProgressBar(prog_box, width=380, height=18)
-            self.pbar.pack(fill="x", padx=4)
+            prog_box.pack(fill="x", pady=(4, 2))
+            self.pbar = ClassicProgressBar(prog_box, width=300, height=16)
+            self.pbar.pack(fill="x", padx=2)
             if progress_val > 0.0:
                 self.pbar.set_progress(progress_val)
             else:
@@ -612,7 +618,7 @@ class RetroDialog(tk.Toplevel):
 
         # ── Beveled 3D Buttons Row ──
         btn_row = tk.Frame(self.body_frame, bg=WIN_BG)
-        btn_row.pack(fill="x", pady=(6, 2))
+        btn_row.pack(fill="x", side="bottom", pady=(4, 2))
 
         self.button_widgets = {}
         for item in reversed(self.buttons_config):
@@ -625,12 +631,13 @@ class RetroDialog(tk.Toplevel):
                 btn_row,
                 text=label,
                 command=lambda act=action: self._button_clicked(act),
-                width=84,
-                height=24,
+                width=68,
+                height=22,
+                font=("Tahoma", 8),
                 is_default=is_def,
                 state=state,
             )
-            btn.pack(side="right", padx=5)
+            btn.pack(side="right", padx=3)
             self.button_widgets[action] = btn
 
         try:
@@ -708,8 +715,8 @@ class RetroProgressDialog(tk.Toplevel):
         super().__init__(parent)
         self.parent = parent
         self.on_complete = on_complete
-        self.width = 380
-        self.height = 200
+        self.width = 330
+        self.height = 155
         self.current_step = 0
 
         self.overrideredirect(True)
@@ -752,58 +759,59 @@ class RetroProgressDialog(tk.Toplevel):
             content,
             title=title,
             close_command=self._on_close,
-            height=26,
+            height=22,
         )
         self.title_bar.pack(fill="x", padx=1, pady=(1, 2))
 
         # Body
         body = tk.Frame(content, bg=WIN_BG)
-        body.pack(fill="both", expand=True, padx=14, pady=8)
+        body.pack(fill="both", expand=True, padx=8, pady=4)
 
         top_box = tk.Frame(body, bg=WIN_BG)
-        top_box.pack(fill="x", pady=(2, 6))
+        top_box.pack(fill="x", pady=(2, 3))
 
-        icon_c = tk.Canvas(top_box, width=64, height=64, bg=WIN_BG, highlightthickness=0)
-        icon_c.pack(side="left", padx=(0, 12))
-        draw_pixel_error_icon(icon_c, size=64)
+        icon_c = tk.Canvas(top_box, width=36, height=36, bg=WIN_BG, highlightthickness=0)
+        icon_c.pack(side="left", padx=(0, 8))
+        draw_pixel_error_icon(icon_c, size=36)
 
         info_box = tk.Frame(top_box, bg=WIN_BG)
         info_box.pack(side="left", fill="both", expand=True)
 
         tk.Label(
             info_box, text=headline,
-            font=("Tahoma", 10, "bold"),
+            font=("Tahoma", 9, "bold"),
             bg=WIN_BG, fg=WIN_TEXT, anchor="w",
-        ).pack(anchor="w", pady=(2, 4))
+        ).pack(anchor="w", pady=(0, 2))
 
         self.status_lbl = tk.Label(
             info_box,
             text="Initializing reverse threat engine...",
-            font=("Tahoma", 9),
+            font=("Tahoma", 8),
             bg=WIN_BG, fg=WIN_MUTED, anchor="w",
-            wraplength=270,
+            wraplength=240,
             justify="left",
         )
         self.status_lbl.pack(anchor="w")
 
-        # Segmented Green Chunks Progress Bar
-        self.pbar = RetroSegmentedProgressBar(body, width=410, height=20)
-        self.pbar.pack(fill="x", pady=(8, 8))
+        # Segmented Blue Blocks Progress Bar with Blue Strip
+        self.pbar = ClassicProgressBar(body, width=300, height=16)
+        self.pbar.pack(fill="x", pady=(4, 4))
 
         # Bottom Button Row
         btn_row = tk.Frame(body, bg=WIN_BG)
-        btn_row.pack(fill="x", pady=(6, 0))
+        btn_row.pack(fill="x", side="bottom", pady=(2, 2))
 
         # Abort button starts disabled (flat-grey with light-grey text)
         self.action_btn = RetroButton(
             btn_row,
             text="Abort",
-            width=85,
-            height=24,
+            width=68,
+            height=22,
+            font=("Tahoma", 8),
             state="disabled",
             command=self._on_close,
         )
-        self.action_btn.pack(side="right", padx=5)
+        self.action_btn.pack(side="right", padx=3)
 
         self.steps = [
             ("Scanning for healthy files that offend security...", 0.15),
@@ -825,7 +833,7 @@ class RetroProgressDialog(tk.Toplevel):
             self.status_lbl.configure(text=text)
             self.pbar.set_progress(prog)
             self.current_step += 1
-            self.after(550, self._run_next_step)
+            self.after(350, self._run_next_step)
         else:
             self.action_btn.configure_button(text="OK", state="normal", command=self._on_done)
 
@@ -858,8 +866,8 @@ def show_retro_alert(parent, title="Error", message='Click "Fix" to fix error.',
         message=message,
         buttons=buttons,
         show_progress=show_progress,
-        width=380,
-        height=185 if not show_progress else 220,
+        width=320,
+        height=140 if not show_progress else 175,
     )
     parent.wait_window(dialog)
     return dialog.result == "ok"

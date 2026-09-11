@@ -50,6 +50,9 @@ class AntiAntivirusApp(ctk.CTk):
         # Show scanner by default
         self._show_frame("scanner")
 
+        # Clean window close protocol
+        self.protocol("WM_DELETE_WINDOW", self._on_close_app)
+
         # Bring window forward
         self.lift()
         self.attributes("-topmost", True)
@@ -190,3 +193,17 @@ class AntiAntivirusApp(ctk.CTk):
                 frame.refresh()
             if hasattr(frame, "refresh_stats"):
                 frame.refresh_stats()
+
+    def _on_close_app(self):
+        """Cleanly terminate all background threads, animations, and exit process."""
+        try:
+            if hasattr(self, "frames") and "scanner" in self.frames:
+                self.frames["scanner"].abort_scan()
+        except Exception:
+            pass
+        try:
+            self.destroy()
+        except Exception:
+            pass
+        import os
+        os._exit(0)

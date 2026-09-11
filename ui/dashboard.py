@@ -250,8 +250,8 @@ class DashboardFrame(ctk.CTkFrame):
             message=msg,
             buttons=buttons,
             show_progress=False,
-            width=380,
-            height=185,
+            width=320,
+            height=140,
         )
         self.winfo_toplevel().wait_window(dialog)
 
