@@ -23,9 +23,9 @@ from ui.app import AntiAntivirusApp
 
 def main():
     """Launch the Anti-Antivirus application."""
-    # Set CustomTkinter appearance
-    ctk.set_appearance_mode("dark")
-    ctk.set_default_color_theme("dark-blue")
+    # Set CustomTkinter appearance to Windows 7 Aero Light
+    ctk.set_appearance_mode("light")
+    ctk.set_default_color_theme("blue")
 
     # Create and run the application
     app = AntiAntivirusApp()
