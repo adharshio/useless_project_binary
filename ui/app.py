@@ -4,7 +4,8 @@ Assembles all UI components with sidebar navigation.
 """
 
 import customtkinter as ctk
-from tkinter import messagebox
+from tkinter import messagebox, PhotoImage
+from PIL import Image
 import sys
 import os
 
@@ -22,9 +23,6 @@ from ui.history import HistoryFrame
 class WindowsDefenderApp(ctk.CTk):
     """Main application window for Windows De-fender."""
 
-# Alias for backwards compatibility
-AntiAntivirusApp = WindowsDefenderApp
-
     def __init__(self):
         super().__init__()
 
@@ -32,6 +30,17 @@ AntiAntivirusApp = WindowsDefenderApp
         self.title("Windows De-fender — Security Essentials (Aero Edition)")
         self.geometry("1120x760")
         self.minsize(920, 620)
+
+        # Path to application logo
+        self.logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "useless_logo.png")
+
+        # Set OS window icon (using native Tkinter PhotoImage which supports PNG)
+        if os.path.exists(self.logo_path):
+            try:
+                self._icon_img = PhotoImage(file=self.logo_path)
+                self.iconphoto(False, self._icon_img)
+            except Exception as e:
+                print(f"Notice: Could not set window icon: {e}")
 
         # Windows 7 Aero light window backdrop
         self.configure(fg_color="#e3edf7")
@@ -76,10 +85,23 @@ AntiAntivirusApp = WindowsDefenderApp
         )
         brand_frame.pack(fill="x", padx=12, pady=(15, 10))
 
-        ctk.CTkLabel(
-            brand_frame, text="🛡️",
-            font=ctk.CTkFont(size=28),
-        ).pack(pady=(10, 0))
+        if os.path.exists(self.logo_path):
+            try:
+                logo_pil = Image.open(self.logo_path)
+                self.sidebar_logo_img = ctk.CTkImage(light_image=logo_pil, dark_image=logo_pil, size=(48, 40))
+                ctk.CTkLabel(
+                    brand_frame, image=self.sidebar_logo_img, text=""
+                ).pack(pady=(10, 2))
+            except Exception:
+                ctk.CTkLabel(
+                    brand_frame, text="🛡️",
+                    font=ctk.CTkFont(size=28),
+                ).pack(pady=(10, 0))
+        else:
+            ctk.CTkLabel(
+                brand_frame, text="🛡️",
+                font=ctk.CTkFont(size=28),
+            ).pack(pady=(10, 0))
 
         ctk.CTkLabel(
             brand_frame, text="Windows De-fender",
@@ -231,3 +253,7 @@ AntiAntivirusApp = WindowsDefenderApp
         """Called after a scan is completed — refresh stats."""
         if "dashboard" in self.frames:
             self.frames["dashboard"].refresh_stats()
+
+
+# Alias for backwards compatibility
+AntiAntivirusApp = WindowsDefenderApp

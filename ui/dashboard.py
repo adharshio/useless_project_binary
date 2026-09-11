@@ -4,6 +4,7 @@ Main dashboard with stats cards, title, tagline, and scan button.
 """
 
 import customtkinter as ctk
+from PIL import Image
 import sys
 import os
 
@@ -35,10 +36,25 @@ class DashboardFrame(ctk.CTkFrame):
         title_row = ctk.CTkFrame(header_frame, fg_color="transparent")
         title_row.pack(pady=(18, 6), padx=20, fill="x")
 
-        shield_label = ctk.CTkLabel(
-            title_row, text="🛡️",
-            font=ctk.CTkFont(size=44),
-        )
+        # Application Logo
+        logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "useless_logo.png")
+        if os.path.exists(logo_path):
+            try:
+                logo_pil = Image.open(logo_path)
+                self.dash_logo_img = ctk.CTkImage(light_image=logo_pil, dark_image=logo_pil, size=(64, 52))
+                shield_label = ctk.CTkLabel(
+                    title_row, image=self.dash_logo_img, text=""
+                )
+            except Exception:
+                shield_label = ctk.CTkLabel(
+                    title_row, text="🛡️",
+                    font=ctk.CTkFont(size=44),
+                )
+        else:
+            shield_label = ctk.CTkLabel(
+                title_row, text="🛡️",
+                font=ctk.CTkFont(size=44),
+            )
         shield_label.pack(side="left", padx=(0, 15))
 
         title_text = ctk.CTkFrame(title_row, fg_color="transparent")
