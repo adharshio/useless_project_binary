@@ -1,5 +1,5 @@
 """
-Anti-Antivirus — Main Entry Point
+Windows De-fender — Main Entry Point
 =============================================
 A humorous "Useless Project" that does the opposite of an antivirus:
   - Clean files get DELETED (moved to a safe folder)
@@ -22,7 +22,7 @@ from ui.app import AntiAntivirusApp
 
 
 def main():
-    """Launch the Anti-Antivirus application."""
+    """Launch the Windows De-fender application."""
     # Set CustomTkinter appearance to Windows 7 Aero Light
     ctk.set_appearance_mode("light")
     ctk.set_default_color_theme("blue")

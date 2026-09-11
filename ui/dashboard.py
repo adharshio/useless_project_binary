@@ -4,6 +4,7 @@ Overview styled like Windows XP Security Center / System Properties.
 """
 
 import customtkinter as ctk
+from PIL import Image
 import sys
 import os
 

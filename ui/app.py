@@ -4,7 +4,8 @@ Assembles all retro UI components with classic Windows XP/98 top navigation bar.
 """
 
 import customtkinter as ctk
-from tkinter import messagebox
+from tkinter import messagebox, PhotoImage
+from PIL import Image
 import sys
 import os
 
