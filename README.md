@@ -20,7 +20,7 @@ A humorous Windows desktop application that does the **exact opposite** of an an
 ### Team Name: Binary
 
 ### Team Members
-- **Team Lead:** Adharsh K — NSS College of Engineering
+- **Member 1:** Adharsh K — NSS College of Engineering
 - **Member 2:** Aswin R — NSS College of Engineering
 
 ### Project Description
