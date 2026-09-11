@@ -16,3 +16,9 @@ build/
 .idea/
 Thumbs.db
 Desktop.ini
+
+# Runtime data & quarantined files
+data/Deleted_Safe_Files/
+data/Threat_Museum/
+data/demo_samples/
+data/*.db

@@ -1,4 +1,6 @@
 @echo off
+echo Closing any running instances of Anti-Antivirus.exe...
+taskkill /F /IM Anti-Antivirus.exe 2>nul
 echo Building Anti-Antivirus.exe with PyInstaller...
 python -m PyInstaller --clean Anti-Antivirus.spec
 if %ERRORLEVEL% equ 0 (

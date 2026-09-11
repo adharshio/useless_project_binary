@@ -25,7 +25,7 @@ from scanner import (
 from database import add_scan, record_session
 from file_manager import move_to_deleted, move_to_museum
 from ui.retro_widgets import (
-    ClassicProgressBar, show_retro_alert,
+    ClassicProgressBar, show_retro_alert, show_comic_purge_modal, RetroDialog,
     WIN_BG, WIN_DARK_BG, WIN_WHITE, WIN_TEXT, WIN_MUTED,
     WIN_BORDER, WIN_BLUE, WIN_NAVY, WIN_RED, WIN_GREEN
 )
@@ -158,8 +158,26 @@ class ScannerViewFrame(ctk.CTkFrame):
         )
         self.file_count_lbl.pack(side="left")
 
+        btn_box = ctk.CTkFrame(info_row, fg_color="transparent")
+        btn_box.pack(side="right")
+
+        self.demo_dlg_btn = ctk.CTkButton(
+            btn_box,
+            text="⚠️  Simulate Error Modal",
+            font=ctk.CTkFont(family="Tahoma", size=10),
+            width=150, height=30,
+            corner_radius=2,
+            fg_color="#ECE9D8",
+            hover_color="#DFDBC9",
+            text_color=WIN_TEXT,
+            border_width=1,
+            border_color=WIN_BORDER,
+            command=self._on_simulate_dialog,
+        )
+        self.demo_dlg_btn.pack(side="left", padx=(0, 6))
+
         self.start_btn = ctk.CTkButton(
-            info_row,
+            btn_box,
             text="▶  START ANTI-SCAN",
             font=ctk.CTkFont(family="Tahoma", size=11, weight="bold"),
             width=150, height=30,
@@ -172,14 +190,14 @@ class ScannerViewFrame(ctk.CTkFrame):
             state="disabled",
             command=self._start_scan_flow,
         )
-        self.start_btn.pack(side="right")
+        self.start_btn.pack(side="left")
 
         # ── Classic Windows Progress Bar & Search Status ──
         progress_group = ctk.CTkFrame(self, fg_color=WIN_BG, border_width=1, border_color=WIN_BORDER, corner_radius=2)
-        progress_group.pack(fill="x", padx=10, pady=6)
+        progress_group.pack(fill="x", padx=4, pady=4)
 
         prog_top = ctk.CTkFrame(progress_group, fg_color="transparent")
-        prog_top.pack(fill="x", padx=12, pady=(8, 2))
+        prog_top.pack(fill="x", padx=6, pady=(4, 1))
 
         self.status_lbl = ctk.CTkLabel(
             prog_top,
@@ -199,11 +217,11 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.pct_lbl.pack(side="right")
 
         # ── Authentic Windows Segmented Blue Moving Progress Bar ──
-        self.classic_pbar = ClassicProgressBar(progress_group, width=500, height=18)
-        self.classic_pbar.pack(fill="x", padx=12, pady=(2, 6))
+        self.classic_pbar = ClassicProgressBar(progress_group, width=800, height=22)
+        self.classic_pbar.pack(fill="x", padx=6, pady=(2, 4))
 
         stats_row = ctk.CTkFrame(progress_group, fg_color="transparent")
-        stats_row.pack(fill="x", padx=12, pady=(0, 8))
+        stats_row.pack(fill="x", padx=6, pady=(0, 4))
 
         self.current_file_lbl = ctk.CTkLabel(
             stats_row,
@@ -335,6 +353,36 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.log_text.see("end")
         self.log_text.configure(state="disabled")
 
+    def _on_simulate_dialog(self):
+        """Display the authentic 3D beveled retro error dialog for demo/testing."""
+        buttons = [
+            ("Fix", "fix", True, "normal"),
+            ("OK", "ok", False, "normal"),
+            ("Ignore", "ignore", False, "disabled"),
+        ]
+        msg = (
+            "A critical system error has been detected!\n\n"
+            "Multiple healthy, uninfected files were discovered on your computer.\n"
+            "Uninfected files violate Windows De-fender's reverse security policy.\n\n"
+            'Click "Fix" to purge all clean files immediately.'
+        )
+        dialog = RetroDialog(
+            self.winfo_toplevel(),
+            title="Error",
+            message=msg,
+            buttons=buttons,
+            show_progress=False,
+            width=380,
+            height=185,
+        )
+        self.winfo_toplevel().wait_window(dialog)
+
+        if dialog.result == "fix":
+            # Show comic purge modal with green segmented progress bar
+            show_comic_purge_modal(self.winfo_toplevel(), on_complete=lambda: self._log("✅ Comic safe-file purge completed successfully."))
+        elif dialog.result == "ok":
+            self._log("ℹ Comic dialog closed via OK.")
+
     def _start_scan_flow(self):
         """Show retro error dialog matching user image before executing."""
         if self.is_scanning or not self.discovered_files:
@@ -343,24 +391,30 @@ class ScannerViewFrame(ctk.CTkFrame):
         # ── Show Retro Warning Dialog (matching user's reference image!) ──
         count = len(self.discovered_files)
         msg = (
-            f'Anti-Antivirus detected {count} file(s) in target folder.\n\n'
-            'Clean safe files will be DESTROYED.\n'
-            'Detected threats will be PRESERVED.\n\n'
+            f"Anti-Antivirus detected {count} file(s) in target folder.\n\n"
+            "Clean safe files will be DESTROYED.\n"
+            "Detected threats will be PRESERVED.\n\n"
             'Click "Fix" to execute Anti-Scan.'
         )
+
+        buttons = [
+            ("Fix", "ok", True, "normal"),
+            ("Cancel", "cancel", False, "normal"),
+            ("Ignore", "ignore", False, "disabled"),
+        ]
 
         proceed = show_retro_alert(
             self.winfo_toplevel(),
             title="Error",
             message=msg,
-            ok_text="Fix",
-            cancel_text="Cancel",
+            buttons=buttons,
         )
 
         if not proceed:
             return
 
-        self._execute_scan()
+        # Trigger comic green-blocks purge modal first, then run actual scan
+        show_comic_purge_modal(self.winfo_toplevel(), on_complete=self._execute_scan)
 
     def _execute_scan(self):
         """Run scanning with classic moving blue blocks progress bar in background."""

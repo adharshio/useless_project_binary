@@ -1,6 +1,6 @@
 """
 Anti-Antivirus — Main Application Window (Classic Windows Retro Edition)
-Assembles all retro UI components with classic Windows XP/98 navigation.
+Assembles all retro UI components with classic Windows XP/98 top navigation bar.
 """
 
 import customtkinter as ctk
@@ -39,14 +39,14 @@ class AntiAntivirusApp(ctk.CTk):
         init_db()
         ensure_directories()
 
-        # ── Layout: Sidebar + Content ──
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
+        # ── Layout: Top Nav Bar + Content ──
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)  # Content area expands
 
-        self._build_sidebar()
+        self._build_top_navbar()
         self._build_content_area()
 
-        # Show scanner by default or dashboard
+        # Show scanner by default
         self._show_frame("scanner")
 
         # Bring window forward
@@ -55,39 +55,41 @@ class AntiAntivirusApp(ctk.CTk):
         self.after(100, lambda: self.attributes("-topmost", False))
         self.focus_force()
 
-    def _build_sidebar(self):
-        """Build the classic Windows Explorer Task Pane sidebar."""
-        sidebar = ctk.CTkFrame(
-            self, width=210, corner_radius=0,
+    def _build_top_navbar(self):
+        """Build the classic Windows top navigation bar with brand + tab buttons."""
+        # ── Outer nav container ──
+        navbar = ctk.CTkFrame(
+            self, height=72, corner_radius=0,
             fg_color=WIN_DARK_BG,
             border_width=1,
             border_color=WIN_BORDER,
         )
-        sidebar.grid(row=0, column=0, sticky="nsew", padx=(2, 0), pady=2)
-        sidebar.grid_propagate(False)
+        navbar.grid(row=0, column=0, sticky="ew", padx=2, pady=(2, 0))
+        navbar.grid_propagate(False)
 
-        # ── Classic Windows XP Blue Header ──
-        brand_frame = ctk.CTkFrame(sidebar, fg_color=WIN_NAVY, height=52, corner_radius=0)
-        brand_frame.pack(fill="x", padx=2, pady=2)
-        brand_frame.pack_propagate(False)
+        # ── Top row: Brand header bar (navy blue) ──
+        brand_bar = ctk.CTkFrame(navbar, fg_color=WIN_NAVY, height=30, corner_radius=0)
+        brand_bar.pack(fill="x")
+        brand_bar.pack_propagate(False)
 
         ctk.CTkLabel(
-            brand_frame, text="🛡️ Windows De-fender",
-            font=ctk.CTkFont(family="Tahoma", size=12, weight="bold"),
+            brand_bar, text="  🛡️ Windows De-fender 1.0 — Reverse Antivirus Protection",
+            font=ctk.CTkFont(family="Tahoma", size=10, weight="bold"),
             text_color=WIN_WHITE,
-        ).pack(pady=(8, 0))
+            anchor="w",
+        ).pack(side="left", padx=6)
 
         ctk.CTkLabel(
-            brand_frame, text="Security Tasks & Tools",
+            brand_bar, text="⚠️ Competition Edition  |  ClamAV Integrated  ",
             font=ctk.CTkFont(family="Tahoma", size=9),
             text_color="#A6CAF0",
-        ).pack()
+        ).pack(side="right", padx=8)
 
-        # Separator line
-        sep = ctk.CTkFrame(sidebar, height=2, fg_color=WIN_BORDER)
-        sep.pack(fill="x", padx=4, pady=4)
+        # ── Bottom row: Tab navigation buttons ──
+        tab_row = ctk.CTkFrame(navbar, fg_color=WIN_DARK_BG, height=38, corner_radius=0)
+        tab_row.pack(fill="x", pady=(2, 0))
+        tab_row.pack_propagate(False)
 
-        # ── Navigation Buttons (Classic Windows 3D Buttons) ──
         self.nav_buttons = {}
         nav_items = [
             ("scanner", "🔬", "Scanner Wizard"),
@@ -99,43 +101,27 @@ class AntiAntivirusApp(ctk.CTk):
 
         for key, icon, label in nav_items:
             btn = ctk.CTkButton(
-                sidebar,
-                text=f"  {icon}  {label}",
-                font=ctk.CTkFont(family="Tahoma", size=11),
-                height=36,
+                tab_row,
+                text=f" {icon}  {label} ",
+                font=ctk.CTkFont(family="Tahoma", size=10),
+                height=30,
                 corner_radius=2,
                 fg_color=WIN_BG,
                 hover_color="#DFDBC9",
                 text_color=WIN_TEXT,
                 border_width=1,
                 border_color=WIN_BORDER,
-                anchor="w",
                 command=lambda k=key: self._show_frame(k),
             )
-            btn.pack(fill="x", padx=6, pady=3)
+            btn.pack(side="left", padx=3, pady=(2, 4))
             self.nav_buttons[key] = btn
-
-        # ── Bottom System Info Box ──
-        spacer = ctk.CTkFrame(sidebar, fg_color="transparent")
-        spacer.pack(expand=True)
-
-        info_box = ctk.CTkFrame(sidebar, fg_color=WIN_BG, border_width=1, border_color=WIN_BORDER, corner_radius=2)
-        info_box.pack(fill="x", padx=6, pady=(0, 8))
-
-        ctk.CTkLabel(
-            info_box,
-            text="⚠️ Competition Edition\nHarmless text threats\nClamAV Engine integrated",
-            font=ctk.CTkFont(family="Tahoma", size=9),
-            text_color=WIN_TEXT,
-            justify="center",
-        ).pack(padx=6, pady=8)
 
     def _build_content_area(self):
         """Build the main retro content frame."""
         self.content_area = ctk.CTkFrame(
             self, fg_color=WIN_BG, corner_radius=0,
         )
-        self.content_area.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
+        self.content_area.grid(row=1, column=0, sticky="nsew", padx=2, pady=(0, 2))
         self.content_area.grid_columnconfigure(0, weight=1)
         self.content_area.grid_rowconfigure(0, weight=1)
 

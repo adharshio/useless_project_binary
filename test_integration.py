@@ -228,8 +228,49 @@ else:
     assert "ClamAV was not found" in res_no_clam["output"]
     print("✅ Clear ClamAV missing error handled gracefully without silent failure.")
 
+    # 8. Test Retro 3D Dialog & Widgets
+    print("\n[8/8] Testing Retro 3D Dialog & Widgets (Bevels, Gradient, 64x64 Icon, Buttons)...")
+    import tkinter as tk
+    from ui.retro_widgets import (
+        RetroButton, RetroTitleBar, RetroSegmentedProgressBar,
+        RetroDialog, draw_pixel_error_icon
+    )
+    root = tk.Tk()
+    root.withdraw()
+
+    # RetroButton test
+    btn_normal = RetroButton(root, text="Fix", width=80, height=24)
+    btn_disabled = RetroButton(root, text="Ignore", width=80, height=24, state="disabled")
+    assert btn_normal.state == "normal"
+    assert btn_disabled.state == "disabled"
+
+    # 64x64 pixelated icon test
+    c = tk.Canvas(root, width=64, height=64)
+    draw_pixel_error_icon(c, size=64)
+    assert len(c.find_all()) >= 4
+
+    # RetroSegmentedProgressBar (green chunks) test
+    pbar = RetroSegmentedProgressBar(root, width=300, height=20)
+    pbar.set_progress(0.7)
+    assert len(pbar.find_all()) > 0
+
+    # RetroDialog test
+    dlg = RetroDialog(
+        root,
+        title="Error",
+        message="Anti-Antivirus test error.",
+        buttons=[("Fix", "ok", True, "normal"), ("Cancel", "cancel", False, "normal"), ("Ignore", "ignore", False, "disabled")],
+        show_progress=True,
+    )
+    assert dlg.winfo_exists()
+    assert dlg.button_widgets["ignore"].state == "disabled"
+    dlg._button_clicked("ok")
+    assert dlg.result == "ok"
+    root.destroy()
+    print("✅ Retro 3D widgets, gradient titlebar, 64x64 icon, and dialog verified.")
+
     print("\n==================================================")
-    print("ALL 7 VERIFICATION TEST SUITES PASSED SUCCESSFULLY!")
+    print("ALL 8 VERIFICATION TEST SUITES PASSED SUCCESSFULLY!")
     print("==================================================")
 
 
