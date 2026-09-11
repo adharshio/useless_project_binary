@@ -1,0 +1,6 @@
+THIS IS A DEMO FILE — NOT A REAL WORM
+========================================
+I'm a computer worm!
+I replicate by... well, I don't actually replicate.
+I'm more of a computer caterpillar, really.
+Systems infected: my own feelings

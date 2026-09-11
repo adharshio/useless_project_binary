@@ -17,7 +17,6 @@ from ui.dashboard import DashboardFrame
 from ui.scanner_view import ScannerViewFrame
 from ui.museum import MuseumFrame
 from ui.history import HistoryFrame
-from ui.stats import StatsFrame
 
 
 class AntiAntivirusApp(ctk.CTk):
@@ -26,13 +25,13 @@ class AntiAntivirusApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # ── Window Configuration ──
-        self.title("Anti-Antivirus — Security, but backwards.")
-        self.geometry("1100x750")
-        self.minsize(900, 600)
+        # ── Window Configuration (Windows 7 Aero Style) ──
+        self.title("Windows De-fender — Security Essentials (Aero Edition)")
+        self.geometry("1120x760")
+        self.minsize(920, 620)
 
-        # Dark theme colors
-        self.configure(fg_color="#0f172a")
+        # Windows 7 Aero light window backdrop
+        self.configure(fg_color="#e3edf7")
 
         # Initialize backend
         init_db()
@@ -55,84 +54,102 @@ class AntiAntivirusApp(ctk.CTk):
         self.focus_force()
 
     def _build_sidebar(self):
-        """Build the left sidebar navigation."""
+        """Build the Windows 7 Control Panel / Explorer style navigation pane."""
         sidebar = ctk.CTkFrame(
-            self, width=220, corner_radius=0,
-            fg_color="#0d1117",
+            self, width=230, corner_radius=0,
+            fg_color="#ebf2f9",
+            border_width=1,
+            border_color="#b6c9dc",
         )
         sidebar.grid(row=0, column=0, sticky="nsew")
         sidebar.grid_propagate(False)
 
-        # ── Logo / Brand ──
-        brand_frame = ctk.CTkFrame(sidebar, fg_color="transparent")
-        brand_frame.pack(fill="x", padx=15, pady=(20, 5))
+        # ── Aero Header / Logo ──
+        brand_frame = ctk.CTkFrame(
+            sidebar, corner_radius=8,
+            fg_color="#205886",
+            border_width=1,
+            border_color="#153e61",
+        )
+        brand_frame.pack(fill="x", padx=12, pady=(15, 10))
 
         ctk.CTkLabel(
             brand_frame, text="🛡️",
-            font=ctk.CTkFont(size=32),
+            font=ctk.CTkFont(size=28),
+        ).pack(pady=(10, 0))
+
+        ctk.CTkLabel(
+            brand_frame, text="Windows De-fender",
+            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
+            text_color="#ffffff",
         ).pack()
 
         ctk.CTkLabel(
-            brand_frame, text="ANTI-AV",
-            font=ctk.CTkFont(size=20, weight="bold"),
-            text_color="#ef4444",
-        ).pack()
-
-        ctk.CTkLabel(
-            brand_frame, text="v1.0.0 — DEMO",
-            font=ctk.CTkFont(size=9),
-            text_color="#475569",
-        ).pack(pady=(0, 5))
+            brand_frame, text="Security Essentials 7.0",
+            font=ctk.CTkFont(family="Segoe UI", size=10),
+            text_color="#b9dcfa",
+        ).pack(pady=(0, 10))
 
         # Separator
-        sep = ctk.CTkFrame(sidebar, height=1, fg_color="#1e293b")
-        sep.pack(fill="x", padx=15, pady=10)
+        sep = ctk.CTkFrame(sidebar, height=1, fg_color="#cadbe8")
+        sep.pack(fill="x", padx=15, pady=8)
+
+        # Navigation label
+        ctk.CTkLabel(
+            sidebar, text="TASKS & NAVIGATION",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            text_color="#5a7d9a",
+            anchor="w",
+        ).pack(fill="x", padx=16, pady=(2, 6))
 
         # ── Navigation Buttons ──
         self.nav_buttons = {}
         nav_items = [
-            ("dashboard", "🏠", "Dashboard"),
-            ("scanner", "🔬", "Scan File"),
-            ("museum", "🏛️", "Malware Museum"),
-            ("history", "📜", "Scan History"),
-            ("stats", "📊", "Statistics"),
+            ("dashboard", "🏠", "Home & Status"),
+            ("scanner", "🔬", "Scan Computer"),
+            ("museum", "🏛️", "Threat Vault"),
+            ("history", "📜", "Security History"),
         ]
 
         for key, icon, label in nav_items:
             btn = ctk.CTkButton(
                 sidebar,
                 text=f"  {icon}  {label}",
-                font=ctk.CTkFont(size=14),
-                height=42,
-                corner_radius=10,
+                font=ctk.CTkFont(family="Segoe UI", size=13),
+                height=38,
+                corner_radius=6,
                 fg_color="transparent",
-                hover_color="#1e293b",
-                text_color="#94a3b8",
+                hover_color="#dbeaf7",
+                text_color="#1d3b58",
                 anchor="w",
+                border_width=0,
                 command=lambda k=key: self._show_frame(k),
             )
-            btn.pack(fill="x", padx=10, pady=2)
+            btn.pack(fill="x", padx=10, pady=3)
             self.nav_buttons[key] = btn
 
-        # ── Bottom Info ──
+        # ── Bottom Info / Disclaimer ──
         spacer = ctk.CTkFrame(sidebar, fg_color="transparent")
         spacer.pack(expand=True)
 
-        bottom_frame = ctk.CTkFrame(sidebar, fg_color="transparent")
-        bottom_frame.pack(fill="x", padx=15, pady=(0, 15))
+        bottom_frame = ctk.CTkFrame(
+            sidebar, fg_color="#dfecf7", corner_radius=6,
+            border_width=1, border_color="#bed1e3"
+        )
+        bottom_frame.pack(fill="x", padx=12, pady=(0, 15))
 
         ctk.CTkLabel(
             bottom_frame,
-            text="⚠️ JOKE PROJECT\nNo real malware used",
-            font=ctk.CTkFont(size=9),
-            text_color="#475569",
+            text="⚠️ Useless Project 3.0\nInverted Antivirus Demo",
+            font=ctk.CTkFont(family="Segoe UI", size=9),
+            text_color="#53728f",
             justify="center",
-        ).pack()
+        ).pack(padx=8, pady=8)
 
     def _build_content_area(self):
         """Build the main content area with all frames."""
         self.content_area = ctk.CTkFrame(
-            self, fg_color="#0f172a", corner_radius=0,
+            self, fg_color="#e3edf7", corner_radius=0,
         )
         self.content_area.grid(row=0, column=1, sticky="nsew")
         self.content_area.grid_columnconfigure(0, weight=1)
@@ -160,26 +177,27 @@ class AntiAntivirusApp(ctk.CTk):
         # History
         self.frames["history"] = HistoryFrame(self.content_area)
 
-        # Statistics
-        self.frames["stats"] = StatsFrame(self.content_area)
-
         # Place all frames in the same grid cell (stacked)
         for frame in self.frames.values():
             frame.grid(row=0, column=0, sticky="nsew")
 
     def _show_frame(self, frame_key):
-        """Switch to the specified frame and update nav buttons."""
-        # Update button colors
+        """Switch to the specified frame and update nav buttons with Windows 7 selection."""
         for key, btn in self.nav_buttons.items():
             if key == frame_key:
                 btn.configure(
-                    fg_color="#1e293b",
-                    text_color="#e2e8f0",
+                    fg_color="#cce6ff",
+                    hover_color="#bfe0ff",
+                    text_color="#003d7a",
+                    border_width=1,
+                    border_color="#89c3f8",
                 )
             else:
                 btn.configure(
                     fg_color="transparent",
-                    text_color="#94a3b8",
+                    hover_color="#dbeaf7",
+                    text_color="#1d3b58",
+                    border_width=0,
                 )
 
         # Refresh data on frame switch

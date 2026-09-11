@@ -28,132 +28,147 @@ class ScannerViewFrame(ctk.CTkFrame):
         self._build_ui()
 
     def _build_ui(self):
-        """Build the scanner view layout."""
-        # ── Header ──
-        header = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        header.pack(fill="x", padx=20, pady=(20, 10))
+        """Build the Windows 7 style scanner view layout."""
+        # ── Aero Header ──
+        header = ctk.CTkFrame(
+            self, fg_color="#1d5582", corner_radius=6,
+            border_width=1, border_color="#143c5c"
+        )
+        header.pack(fill="x", padx=20, pady=(15, 10))
 
         ctk.CTkLabel(
-            header, text="🔬  File Scanner",
-            font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#e2e8f0",
-        ).pack(padx=20, pady=(15, 3))
+            header, text="🔬  Scan Computer for Files",
+            font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"),
+            text_color="#ffffff",
+        ).pack(padx=20, pady=(12, 2))
 
         ctk.CTkLabel(
-            header, text="Select a file to analyze with our reverse-engineered protection",
-            font=ctk.CTkFont(size=12),
-            text_color="#64748b",
-        ).pack(padx=20, pady=(0, 15))
+            header, text="Select items to evaluate with Windows De-fender inverted security rules",
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            text_color="#c8e1f5",
+        ).pack(padx=20, pady=(0, 12))
 
-        # ── File Selection ──
-        select_frame = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        select_frame.pack(fill="x", padx=20, pady=10)
+        # ── File Selection (Windows 7 White Card) ──
+        select_frame = ctk.CTkFrame(
+            self, fg_color="#ffffff", corner_radius=6,
+            border_width=1, border_color="#b8ccd9"
+        )
+        select_frame.pack(fill="x", padx=20, pady=6)
 
         self.file_label = ctk.CTkLabel(
             select_frame,
-            text="No file selected",
-            font=ctk.CTkFont(size=13),
-            text_color="#64748b",
+            text="No item currently selected for scan",
+            font=ctk.CTkFont(family="Segoe UI", size=13),
+            text_color="#53728f",
         )
-        self.file_label.pack(padx=20, pady=(15, 10))
+        self.file_label.pack(padx=20, pady=(12, 8))
 
         btn_row = ctk.CTkFrame(select_frame, fg_color="transparent")
-        btn_row.pack(pady=(0, 15))
+        btn_row.pack(pady=(0, 12))
 
         self.select_btn = ctk.CTkButton(
-            btn_row, text="📂  Browse File",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            width=180, height=42,
-            corner_radius=10,
-            fg_color="#1e293b",
-            hover_color="#334155",
+            btn_row, text="📂  Browse File...",
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            width=160, height=38,
+            corner_radius=6,
+            fg_color="#ffffff",
+            hover_color="#edf5fc",
+            text_color="#184164",
             border_width=1,
-            border_color="#475569",
+            border_color="#a2b9ce",
             command=self._browse_file,
         )
-        self.select_btn.pack(side="left", padx=5)
+        self.select_btn.pack(side="left", padx=6)
 
         self.scan_btn = ctk.CTkButton(
-            btn_row, text="⚡  SCAN NOW",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            width=180, height=42,
-            corner_radius=10,
-            fg_color="#ef4444",
-            hover_color="#dc2626",
+            btn_row, text="⚡  Scan Now",
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            width=160, height=38,
+            corner_radius=6,
+            fg_color="#1e70ba",
+            hover_color="#2787de",
+            border_width=1,
+            border_color="#16568f",
             command=self._start_scan,
             state="disabled",
         )
-        self.scan_btn.pack(side="left", padx=5)
+        self.scan_btn.pack(side="left", padx=6)
 
         # ── Scanning Animation Area ──
-        self.anim_frame = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        self.anim_frame.pack(fill="x", padx=20, pady=10)
+        self.anim_frame = ctk.CTkFrame(
+            self, fg_color="#ffffff", corner_radius=6,
+            border_width=1, border_color="#b8ccd9"
+        )
+        self.anim_frame.pack(fill="x", padx=20, pady=6)
 
         self.scan_status_label = ctk.CTkLabel(
             self.anim_frame,
-            text="Waiting for file...",
-            font=ctk.CTkFont(size=14),
-            text_color="#64748b",
+            text="Status: Waiting for file selection...",
+            font=ctk.CTkFont(family="Segoe UI", size=13),
+            text_color="#53728f",
         )
-        self.scan_status_label.pack(padx=20, pady=(15, 10))
+        self.scan_status_label.pack(padx=20, pady=(12, 6))
 
         self.progress_bar = ctk.CTkProgressBar(
-            self.anim_frame, height=8, corner_radius=4,
-            progress_color="#3b82f6", fg_color="#1e293b",
+            self.anim_frame, height=12, corner_radius=3,
+            progress_color="#1e70ba", fg_color="#e5eef5",
             mode="determinate",
         )
-        self.progress_bar.pack(fill="x", padx=30, pady=(0, 5))
+        self.progress_bar.pack(fill="x", padx=25, pady=(0, 4))
         self.progress_bar.set(0)
 
         self.progress_pct = ctk.CTkLabel(
             self.anim_frame, text="",
-            font=ctk.CTkFont(size=11),
-            text_color="#475569",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color="#64829e",
         )
-        self.progress_pct.pack(pady=(0, 15))
+        self.progress_pct.pack(pady=(0, 10))
 
-        # ── Results Area ──
-        self.result_frame = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        self.result_frame.pack(fill="both", expand=True, padx=20, pady=(10, 20))
+        # ── Results Area (Windows 7 Card) ──
+        self.result_frame = ctk.CTkFrame(
+            self, fg_color="#ffffff", corner_radius=6,
+            border_width=1, border_color="#b8ccd9"
+        )
+        self.result_frame.pack(fill="both", expand=True, padx=20, pady=(6, 15))
 
         self.result_icon = ctk.CTkLabel(
             self.result_frame, text="",
-            font=ctk.CTkFont(size=52),
+            font=ctk.CTkFont(size=44),
         )
-        self.result_icon.pack(pady=(20, 5))
+        self.result_icon.pack(pady=(16, 4))
 
         self.result_title = ctk.CTkLabel(
             self.result_frame, text="",
-            font=ctk.CTkFont(size=22, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=20, weight="bold"),
         )
         self.result_title.pack()
 
         self.result_subtitle = ctk.CTkLabel(
             self.result_frame, text="",
-            font=ctk.CTkFont(size=14),
-            text_color="#94a3b8",
+            font=ctk.CTkFont(family="Segoe UI", size=13),
+            text_color="#53728f",
         )
-        self.result_subtitle.pack(pady=(5, 0))
+        self.result_subtitle.pack(pady=(4, 0))
 
         self.result_decision = ctk.CTkLabel(
             self.result_frame, text="",
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
         )
-        self.result_decision.pack(pady=(10, 5))
+        self.result_decision.pack(pady=(8, 4))
 
         self.result_hash = ctk.CTkLabel(
             self.result_frame, text="",
             font=ctk.CTkFont(family="Consolas", size=10),
-            text_color="#475569",
+            text_color="#64829e",
         )
-        self.result_hash.pack(pady=(5, 5))
+        self.result_hash.pack(pady=(2, 4))
 
         self.result_threat = ctk.CTkLabel(
             self.result_frame, text="",
-            font=ctk.CTkFont(size=12),
-            text_color="#f59e0b",
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            text_color="#d97706",
         )
-        self.result_threat.pack(pady=(0, 20))
+        self.result_threat.pack(pady=(0, 16))
 
     def _browse_file(self):
         """Open file dialog to select a file."""
@@ -245,25 +260,25 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.result_icon.configure(text="🚨")
         self.result_title.configure(
             text="SAFE FILE DETECTED",
-            text_color="#ef4444",
+            text_color="#cc0000",
         )
         self.result_subtitle.configure(
             text="Unfortunately, this file is too safe. How disappointing.",
         )
         self.result_decision.configure(
             text="Decision: DELETE  🗑️",
-            text_color="#ef4444",
+            text_color="#cc0000",
         )
         self.result_hash.configure(
             text=f"SHA-256: {result['sha256']}",
         )
         self.result_threat.configure(
             text="No threats found. What a waste of a scan.",
-            text_color="#64748b",
+            text_color="#53728f",
         )
         self.scan_status_label.configure(
             text="⚠️  Safe file identified — initiating removal protocol",
-            text_color="#ef4444",
+            text_color="#cc0000",
         )
 
         # Confirm before moving
@@ -298,14 +313,14 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.result_icon.configure(text="🏆")
         self.result_title.configure(
             text="THREAT DETECTED!",
-            text_color="#22c55e",
+            text_color="#2d7a2d",
         )
         self.result_subtitle.configure(
             text="Excellent! We found something dangerous. What a treasure!",
         )
         self.result_decision.configure(
             text="Decision: PRESERVE  🏛️",
-            text_color="#22c55e",
+            text_color="#2d7a2d",
         )
         self.result_hash.configure(
             text=f"SHA-256: {result['sha256']}",

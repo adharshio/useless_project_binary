@@ -19,50 +19,56 @@ class HistoryFrame(ctk.CTkFrame):
         self._build_ui()
 
     def _build_ui(self):
-        """Build the history layout."""
-        # ── Header ──
-        header = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        header.pack(fill="x", padx=20, pady=(20, 10))
+        """Build the Windows 7 style history layout."""
+        # ── Aero Header ──
+        header = ctk.CTkFrame(
+            self, fg_color="#1d5582", corner_radius=6,
+            border_width=1, border_color="#143c5c"
+        )
+        header.pack(fill="x", padx=20, pady=(15, 10))
 
         ctk.CTkLabel(
-            header, text="📜  Scan History",
-            font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#3b82f6",
-        ).pack(padx=20, pady=(15, 3))
+            header, text="📜  Security Event History",
+            font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"),
+            text_color="#ffffff",
+        ).pack(padx=20, pady=(12, 2))
 
         ctk.CTkLabel(
-            header, text="A complete log of all our questionable security decisions",
-            font=ctk.CTkFont(size=12),
-            text_color="#64748b",
-        ).pack(padx=20, pady=(0, 15))
+            header, text="Detailed log of all files evaluated, safe files eliminated, and threats harbored",
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            text_color="#c8e1f5",
+        ).pack(padx=20, pady=(0, 12))
 
-        # ── Table Header ──
-        table_header = ctk.CTkFrame(self, fg_color="#1e293b", corner_radius=8)
-        table_header.pack(fill="x", padx=20, pady=(10, 0))
+        # ── Windows 7 Table Header ──
+        table_header = ctk.CTkFrame(
+            self, fg_color="#dfeaf4", corner_radius=4,
+            border_width=1, border_color="#b8ccd9"
+        )
+        table_header.pack(fill="x", padx=20, pady=(6, 0))
         table_header.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
 
-        headers = ["File", "SHA-256", "Result", "Action", "Time"]
+        headers = ["File Name", "SHA-256 Digest", "Diagnosis", "Executed Action", "Log Time"]
         for i, h in enumerate(headers):
             ctk.CTkLabel(
                 table_header, text=h,
-                font=ctk.CTkFont(size=11, weight="bold"),
-                text_color="#94a3b8",
-            ).grid(row=0, column=i, padx=10, pady=8, sticky="w")
+                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+                text_color="#184164",
+            ).grid(row=0, column=i, padx=10, pady=7, sticky="w")
 
         # ── Scrollable Rows ──
         self.scroll_frame = ctk.CTkScrollableFrame(
             self, fg_color="transparent",
             corner_radius=0,
         )
-        self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=(0, 15))
         self.scroll_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
 
         # Empty state
         self.empty_label = ctk.CTkLabel(
             self.scroll_frame,
-            text="📭  No scans yet. Start scanning to build history!",
-            font=ctk.CTkFont(size=14),
-            text_color="#475569",
+            text="📭  No history logged yet. Run scans to populate the security log.",
+            font=ctk.CTkFont(family="Segoe UI", size=14),
+            text_color="#53728f",
         )
         self.empty_label.grid(row=0, column=0, columnspan=5, pady=40)
 
@@ -76,23 +82,21 @@ class HistoryFrame(ctk.CTkFrame):
         if not history:
             ctk.CTkLabel(
                 self.scroll_frame,
-                text="📭  No scans yet. Start scanning to build history!",
-                font=ctk.CTkFont(size=14),
-                text_color="#475569",
+                text="📭  No history logged yet. Run scans to populate the security log.",
+                font=ctk.CTkFont(family="Segoe UI", size=14),
+                text_color="#53728f",
             ).grid(row=0, column=0, columnspan=5, pady=40)
             return
 
         self.scroll_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
 
         for i, record in enumerate(history):
-            bg = "#0d1117" if i % 2 == 0 else "#111827"
-
-            # Result color
+            # Result color in Windows 7 style
             if record["result"] == "CLEAN":
-                result_color = "#ef4444"
+                result_color = "#cc0000"
                 result_icon = "🔴"
             else:
-                result_color = "#22c55e"
+                result_color = "#2d7a2d"
                 result_icon = "🟢"
 
             # File name (truncated)
@@ -102,25 +106,25 @@ class HistoryFrame(ctk.CTkFrame):
 
             ctk.CTkLabel(
                 self.scroll_frame, text=f"📄 {fname}",
-                font=ctk.CTkFont(size=11),
-                text_color="#e2e8f0",
-            ).grid(row=i, column=0, padx=8, pady=4, sticky="w")
+                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+                text_color="#143654",
+            ).grid(row=i, column=0, padx=8, pady=5, sticky="w")
 
             # Hash (truncated)
             hash_short = record["sha256"][:12] + "..."
             ctk.CTkLabel(
                 self.scroll_frame, text=hash_short,
                 font=ctk.CTkFont(family="Consolas", size=10),
-                text_color="#475569",
-            ).grid(row=i, column=1, padx=8, pady=4, sticky="w")
+                text_color="#53728f",
+            ).grid(row=i, column=1, padx=8, pady=5, sticky="w")
 
             # Result
             ctk.CTkLabel(
                 self.scroll_frame,
                 text=f"{result_icon} {record['result']}",
-                font=ctk.CTkFont(size=11, weight="bold"),
+                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
                 text_color=result_color,
-            ).grid(row=i, column=2, padx=8, pady=4, sticky="w")
+            ).grid(row=i, column=2, padx=8, pady=5, sticky="w")
 
             # Action (truncated)
             action = record["action"]
@@ -128,13 +132,13 @@ class HistoryFrame(ctk.CTkFrame):
                 action = action[:17] + "..."
             ctk.CTkLabel(
                 self.scroll_frame, text=action,
-                font=ctk.CTkFont(size=10),
-                text_color="#94a3b8",
-            ).grid(row=i, column=3, padx=8, pady=4, sticky="w")
+                font=ctk.CTkFont(family="Segoe UI", size=11),
+                text_color="#244460",
+            ).grid(row=i, column=3, padx=8, pady=5, sticky="w")
 
             # Timestamp
             ctk.CTkLabel(
                 self.scroll_frame, text=record["timestamp"],
-                font=ctk.CTkFont(size=10),
-                text_color="#64748b",
-            ).grid(row=i, column=4, padx=8, pady=4, sticky="w")
+                font=ctk.CTkFont(family="Segoe UI", size=10),
+                text_color="#53728f",
+            ).grid(row=i, column=4, padx=8, pady=5, sticky="w")

@@ -23,18 +23,21 @@ class DashboardFrame(ctk.CTkFrame):
         self._build_ui()
 
     def _build_ui(self):
-        """Build the dashboard layout."""
-        # ── Header Section ──
-        header_frame = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        header_frame.pack(fill="x", padx=20, pady=(20, 10))
+        """Build the Windows 7 Security Essentials dashboard layout."""
+        # ── Aero Banner / Header Section ──
+        header_frame = ctk.CTkFrame(
+            self, fg_color="#1d5582", corner_radius=6,
+            border_width=1, border_color="#143c5c"
+        )
+        header_frame.pack(fill="x", padx=20, pady=(15, 10))
 
         # Shield icon + Title
         title_row = ctk.CTkFrame(header_frame, fg_color="transparent")
-        title_row.pack(pady=(25, 5))
+        title_row.pack(pady=(18, 6), padx=20, fill="x")
 
         shield_label = ctk.CTkLabel(
             title_row, text="🛡️",
-            font=ctk.CTkFont(size=48),
+            font=ctk.CTkFont(size=44),
         )
         shield_label.pack(side="left", padx=(0, 15))
 
@@ -42,143 +45,160 @@ class DashboardFrame(ctk.CTkFrame):
         title_text.pack(side="left")
 
         title_label = ctk.CTkLabel(
-            title_text, text="ANTI-ANTIVIRUS",
-            font=ctk.CTkFont(family="Segoe UI", size=36, weight="bold"),
-            text_color="#ef4444",
+            title_text, text="Windows De-fender",
+            font=ctk.CTkFont(family="Segoe UI", size=26, weight="bold"),
+            text_color="#ffffff",
         )
         title_label.pack(anchor="w")
 
         tagline_label = ctk.CTkLabel(
-            title_text, text="Security, but backwards.",
-            font=ctk.CTkFont(family="Segoe UI", size=16),
-            text_color="#94a3b8",
+            title_text, text="Computer Status: AT RISK (Inverted Security is ON)",
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            text_color="#ffd2d2",
         )
         tagline_label.pack(anchor="w")
 
-        # Disclaimer
-        disclaimer = ctk.CTkLabel(
-            header_frame,
-            text="⚠️  DEMO / JOKE PROJECT — No real malware is used or created  ⚠️",
-            font=ctk.CTkFont(size=11),
-            text_color="#f59e0b",
+        # Windows 7 Notification strip
+        strip = ctk.CTkFrame(
+            header_frame, fg_color="#fff2d6", corner_radius=4,
+            border_width=1, border_color="#e6c67a"
         )
-        disclaimer.pack(pady=(5, 20))
+        strip.pack(fill="x", padx=20, pady=(5, 15))
 
-        # ── Stats Cards ──
+        disclaimer = ctk.CTkLabel(
+            strip,
+            text="ℹ️  Windows 7 Security Warning: Healthy files will be deleted. Viruses will be preserved.",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color="#7a5500",
+        )
+        disclaimer.pack(padx=12, pady=6)
+
+        # ── Stats Cards (Windows 7 White Tiles) ──
         cards_frame = ctk.CTkFrame(self, fg_color="transparent")
-        cards_frame.pack(fill="x", padx=20, pady=10)
+        cards_frame.pack(fill="x", padx=20, pady=5)
         cards_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
         self.stat_cards = {}
         card_defs = [
-            ("files_scanned", "📊", "Files Scanned", "0", "#3b82f6"),
-            ("clean_deleted", "🗑️", "Clean Deleted", "0", "#ef4444"),
-            ("threats_kept", "🏆", "Threats Preserved", "0", "#22c55e"),
-            ("uselessness", "💯", "Uselessness Score", "0%", "#a855f7"),
+            ("files_scanned", "📊", "Files Scanned", "0", "#0066cc"),
+            ("clean_deleted", "🗑️", "Clean Purged", "0", "#cc0000"),
+            ("threats_kept", "🏆", "Threats Protected", "0", "#2d7a2d"),
+            ("uselessness", "🎯", "Uselessness Rating", "0%", "#6f42c1"),
         ]
 
         for i, (key, icon, label, value, color) in enumerate(card_defs):
             card = self._create_stat_card(cards_frame, icon, label, value, color)
-            card.grid(row=0, column=i, padx=8, pady=5, sticky="nsew")
+            card.grid(row=0, column=i, padx=6, pady=5, sticky="nsew")
             self.stat_cards[key] = card
 
-        # ── Security Score Bar ──
-        score_frame = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        score_frame.pack(fill="x", padx=20, pady=10)
+        # ── Security Score Bar (Windows 7 Meter) ──
+        score_frame = ctk.CTkFrame(
+            self, fg_color="#ffffff", corner_radius=6,
+            border_width=1, border_color="#b8ccd9"
+        )
+        score_frame.pack(fill="x", padx=20, pady=8)
 
         score_header = ctk.CTkFrame(score_frame, fg_color="transparent")
-        score_header.pack(fill="x", padx=20, pady=(15, 5))
+        score_header.pack(fill="x", padx=16, pady=(12, 4))
 
         ctk.CTkLabel(
-            score_header, text="🔒 Security Score",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#94a3b8",
+            score_header, text="🔒 Protection Level",
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            text_color="#244460",
         ).pack(side="left")
 
         self.security_score_label = ctk.CTkLabel(
             score_header, text="0%",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#ef4444",
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            text_color="#cc0000",
         )
         self.security_score_label.pack(side="right")
 
         self.security_bar = ctk.CTkProgressBar(
-            score_frame, height=12, corner_radius=6,
-            progress_color="#ef4444", fg_color="#1e293b",
+            score_frame, height=14, corner_radius=3,
+            progress_color="#d9534f", fg_color="#e5eef5",
         )
-        self.security_bar.pack(fill="x", padx=20, pady=(0, 15))
+        self.security_bar.pack(fill="x", padx=16, pady=(0, 14))
         self.security_bar.set(0)
 
-        # ── Action Buttons ──
+        # ── Action Buttons (Windows 7 Push Buttons) ──
         buttons_frame = ctk.CTkFrame(self, fg_color="transparent")
-        buttons_frame.pack(fill="x", padx=20, pady=10)
+        buttons_frame.pack(fill="x", padx=20, pady=8)
         buttons_frame.grid_columnconfigure((0, 1), weight=1)
 
-        # Scan button
+        # Primary Scan button (Windows 7 Aero Blue)
         self.scan_btn = ctk.CTkButton(
             buttons_frame,
-            text="🔍  SCAN FILE",
-            font=ctk.CTkFont(size=20, weight="bold"),
-            height=65,
-            corner_radius=15,
-            fg_color="#ef4444",
-            hover_color="#dc2626",
+            text="🔍  Scan Now...",
+            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
+            height=50,
+            corner_radius=6,
+            fg_color="#1e70ba",
+            hover_color="#2787de",
+            border_width=1,
+            border_color="#16568f",
             command=self._on_scan_click,
         )
-        self.scan_btn.grid(row=0, column=0, padx=8, pady=5, sticky="ew")
+        self.scan_btn.grid(row=0, column=0, padx=6, pady=5, sticky="ew")
 
-        # Generate demo files button
+        # Secondary Generate demo files button
         self.gen_btn = ctk.CTkButton(
             buttons_frame,
-            text="🧪  Generate Demo Files",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            height=65,
-            corner_radius=15,
-            fg_color="#1e293b",
-            hover_color="#334155",
-            border_width=2,
-            border_color="#3b82f6",
+            text="🧪  Generate Test Threats",
+            font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"),
+            height=50,
+            corner_radius=6,
+            fg_color="#ffffff",
+            hover_color="#edf5fc",
+            text_color="#184164",
+            border_width=1,
+            border_color="#a2b9ce",
             command=self._on_generate_click,
         )
-        self.gen_btn.grid(row=0, column=1, padx=8, pady=5, sticky="ew")
+        self.gen_btn.grid(row=0, column=1, padx=6, pady=5, sticky="ew")
 
-        # ── Status Bar ──
-        self.status_frame = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=10)
-        self.status_frame.pack(fill="x", padx=20, pady=(10, 20))
+        # ── Windows 7 Status Bar ──
+        self.status_frame = ctk.CTkFrame(
+            self, fg_color="#f2f7fc", corner_radius=4,
+            border_width=1, border_color="#bdd0e0"
+        )
+        self.status_frame.pack(fill="x", padx=20, pady=(8, 15))
 
         self.status_label = ctk.CTkLabel(
             self.status_frame,
-            text="🟢  System ready. Select a file to begin reverse protection.",
-            font=ctk.CTkFont(size=12),
-            text_color="#64748b",
+            text="Status: Real-time reverse protection is active. Threat definitions up to date.",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color="#456582",
         )
-        self.status_label.pack(padx=15, pady=10)
+        self.status_label.pack(padx=12, pady=7, anchor="w")
 
     def _create_stat_card(self, parent, icon, label, value, accent_color):
-        """Create a styled statistics card."""
-        card = ctk.CTkFrame(parent, fg_color="#0d1117", corner_radius=12)
+        """Create a styled Windows 7 statistics card."""
+        card = ctk.CTkFrame(
+            parent, fg_color="#ffffff", corner_radius=6,
+            border_width=1, border_color="#b8ccd9"
+        )
 
         icon_label = ctk.CTkLabel(
             card, text=icon,
-            font=ctk.CTkFont(size=28),
+            font=ctk.CTkFont(size=24),
         )
-        icon_label.pack(pady=(15, 5))
+        icon_label.pack(pady=(12, 2))
 
         value_label = ctk.CTkLabel(
             card, text=value,
-            font=ctk.CTkFont(size=28, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=24, weight="bold"),
             text_color=accent_color,
         )
         value_label.pack()
-        # Store reference for updates
         card.value_label = value_label
 
         name_label = ctk.CTkLabel(
             card, text=label,
-            font=ctk.CTkFont(size=11),
-            text_color="#64748b",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color="#53728f",
         )
-        name_label.pack(pady=(0, 15))
+        name_label.pack(pady=(0, 12))
 
         return card
 

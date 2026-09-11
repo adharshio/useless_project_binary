@@ -19,36 +19,39 @@ class MuseumFrame(ctk.CTkFrame):
         self._build_ui()
 
     def _build_ui(self):
-        """Build the museum layout."""
-        # ── Header ──
-        header = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        header.pack(fill="x", padx=20, pady=(20, 10))
+        """Build the Windows 7 style museum layout."""
+        # ── Aero Header ──
+        header = ctk.CTkFrame(
+            self, fg_color="#1d5582", corner_radius=6,
+            border_width=1, border_color="#143c5c"
+        )
+        header.pack(fill="x", padx=20, pady=(15, 10))
 
         ctk.CTkLabel(
-            header, text="🏛️  Malware Museum",
-            font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#22c55e",
-        ).pack(padx=20, pady=(15, 3))
+            header, text="🏛️  Threat Vault & Museum",
+            font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"),
+            text_color="#ffffff",
+        ).pack(padx=20, pady=(12, 2))
 
         ctk.CTkLabel(
-            header, text="A curated collection of our finest preserved threats",
-            font=ctk.CTkFont(size=12),
-            text_color="#64748b",
-        ).pack(padx=20, pady=(0, 15))
+            header, text="Curated archive of cherished viruses and malware specimens",
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            text_color="#c8e1f5",
+        ).pack(padx=20, pady=(0, 12))
 
         # ── Museum Content (Scrollable) ──
         self.scroll_frame = ctk.CTkScrollableFrame(
             self, fg_color="transparent",
             corner_radius=0,
         )
-        self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=(10, 20))
+        self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=(6, 15))
 
         # ── Empty State ──
         self.empty_label = ctk.CTkLabel(
             self.scroll_frame,
-            text="🦴  No threats collected yet.\nKeep scanning to fill the museum!",
-            font=ctk.CTkFont(size=16),
-            text_color="#475569",
+            text="🦴  No threat specimens collected yet.\nScan files to preserve malware in the vault!",
+            font=ctk.CTkFont(family="Segoe UI", size=15),
+            text_color="#53728f",
             justify="center",
         )
         self.empty_label.pack(pady=60)
@@ -64,9 +67,9 @@ class MuseumFrame(ctk.CTkFrame):
         if not items:
             self.empty_label = ctk.CTkLabel(
                 self.scroll_frame,
-                text="🦴  No threats collected yet.\nKeep scanning to fill the museum!",
-                font=ctk.CTkFont(size=16),
-                text_color="#475569",
+                text="🦴  No threat specimens collected yet.\nScan files to preserve malware in the vault!",
+                font=ctk.CTkFont(family="Segoe UI", size=15),
+                text_color="#53728f",
                 justify="center",
             )
             self.empty_label.pack(pady=60)
@@ -75,22 +78,22 @@ class MuseumFrame(ctk.CTkFrame):
         # Museum count
         ctk.CTkLabel(
             self.scroll_frame,
-            text=f"Exhibits: {len(items)}",
-            font=ctk.CTkFont(size=13, weight="bold"),
-            text_color="#94a3b8",
+            text=f"Total Preserved Threats: {len(items)}",
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            text_color="#184164",
         ).pack(anchor="w", pady=(5, 10))
 
-        # Create cards for each museum item
+        # Create cards for each museum item (Windows 7 White Cards)
         for item in items:
             card = ctk.CTkFrame(
-                self.scroll_frame, fg_color="#0d1117",
-                corner_radius=12,
+                self.scroll_frame, fg_color="#ffffff",
+                corner_radius=6, border_width=1, border_color="#b8ccd9"
             )
-            card.pack(fill="x", pady=5)
+            card.pack(fill="x", pady=4)
 
             # Card content
             content = ctk.CTkFrame(card, fg_color="transparent")
-            content.pack(fill="x", padx=15, pady=12)
+            content.pack(fill="x", padx=15, pady=10)
 
             # Top row: icon + filename + threat name
             top_row = ctk.CTkFrame(content, fg_color="transparent")
@@ -103,17 +106,17 @@ class MuseumFrame(ctk.CTkFrame):
 
             ctk.CTkLabel(
                 top_row, text=item["filename"],
-                font=ctk.CTkFont(size=14, weight="bold"),
-                text_color="#e2e8f0",
+                font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"),
+                text_color="#143654",
             ).pack(side="left")
 
             if item.get("threat_name"):
                 threat_badge = ctk.CTkLabel(
                     top_row,
                     text=f"  {item['threat_name']}  ",
-                    font=ctk.CTkFont(size=10),
-                    text_color="#f59e0b",
-                    fg_color="#422006",
+                    font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+                    text_color="#7a4f01",
+                    fg_color="#fff3cd",
                     corner_radius=4,
                 )
                 threat_badge.pack(side="right")
@@ -127,12 +130,12 @@ class MuseumFrame(ctk.CTkFrame):
                 bottom_row,
                 text=f"🔑 {hash_short}",
                 font=ctk.CTkFont(family="Consolas", size=10),
-                text_color="#475569",
+                text_color="#53728f",
             ).pack(side="left")
 
             ctk.CTkLabel(
                 bottom_row,
                 text=f"🕐 {item['timestamp']}",
-                font=ctk.CTkFont(size=10),
-                text_color="#475569",
+                font=ctk.CTkFont(family="Segoe UI", size=10),
+                text_color="#53728f",
             ).pack(side="right")
