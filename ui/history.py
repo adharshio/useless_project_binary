@@ -1,85 +1,89 @@
 """
-Anti-Antivirus — Scan History UI
-Displays complete scan history in a scrollable table with columns:
-Filename | Status | Threat | Action | Time
+Anti-Antivirus — Scan History UI (Classic Windows Retro Edition)
+Displays scan events in classic Windows Event Viewer / Explorer table format.
 """
 
 import customtkinter as ctk
+import tkinter as tk
 import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database import get_history
+from ui.retro_widgets import (
+    WIN_BG, WIN_DARK_BG, WIN_WHITE, WIN_TEXT, WIN_MUTED,
+    WIN_BORDER, WIN_NAVY, WIN_BLUE, WIN_RED, WIN_GREEN
+)
 
 
 class HistoryFrame(ctk.CTkFrame):
-    """Scan History tab — shows all past scan records."""
+    """Scan History tab styled in classic Windows Event Viewer table aesthetic."""
 
     def __init__(self, parent):
-        super().__init__(parent, fg_color="transparent")
+        super().__init__(parent, fg_color=WIN_BG, corner_radius=0)
         self._build_ui()
 
     def _build_ui(self):
-        """Build the history layout."""
-        # ── Header ──
-        header = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        header.pack(fill="x", padx=20, pady=(20, 10))
+        """Build the classic Event Viewer table layout."""
+        # ── Classic Blue Header ──
+        header = ctk.CTkFrame(self, fg_color=WIN_NAVY, height=36, corner_radius=0)
+        header.pack(fill="x", padx=8, pady=(8, 4))
+        header.pack_propagate(False)
 
         ctk.CTkLabel(
-            header, text="📜  Scan History",
-            font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#3b82f6",
-        ).pack(padx=20, pady=(15, 3))
+            header, text="  📜 Windows De-fender — Event Viewer (Scan History)",
+            font=ctk.CTkFont(family="Tahoma", size=11, weight="bold"),
+            text_color=WIN_WHITE,
+            anchor="w",
+        ).pack(side="left", padx=6)
 
-        ctk.CTkLabel(
-            header, text="Complete log of all inverted security actions and detections",
-            font=ctk.CTkFont(size=12),
-            text_color="#64748b",
-        ).pack(padx=20, pady=(0, 15))
+        # ── Table Container ──
+        container = ctk.CTkFrame(self, fg_color=WIN_BG, border_width=1, border_color=WIN_BORDER, corner_radius=2)
+        container.pack(fill="both", expand=True, padx=8, pady=4)
 
-        # ── Table Header (Filename | Status | Threat | Action | Time) ──
-        table_header = ctk.CTkFrame(self, fg_color="#1e293b", corner_radius=8)
-        table_header.pack(fill="x", padx=20, pady=(10, 0))
+        # Classic Column Headers (3D raised look)
+        table_header = ctk.CTkFrame(container, fg_color=WIN_DARK_BG, height=28, corner_radius=0)
+        table_header.pack(fill="x", padx=4, pady=(4, 0))
         table_header.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
 
         headers = ["Filename", "Status", "Threat", "Action", "Time"]
         for i, h in enumerate(headers):
-            ctk.CTkLabel(
+            lbl = ctk.CTkLabel(
                 table_header, text=h,
-                font=ctk.CTkFont(size=12, weight="bold"),
-                text_color="#94a3b8",
-            ).grid(row=0, column=i, padx=12, pady=10, sticky="w")
+                font=ctk.CTkFont(family="Tahoma", size=10, weight="bold"),
+                text_color=WIN_TEXT,
+            )
+            lbl.grid(row=0, column=i, padx=8, pady=4, sticky="w")
 
-        # ── Scrollable Rows ──
+        # Scrollable rows in sunken white box
         self.scroll_frame = ctk.CTkScrollableFrame(
-            self, fg_color="transparent",
+            container, fg_color=WIN_WHITE,
+            border_width=1, border_color=WIN_BORDER,
             corner_radius=0,
         )
-        self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        self.scroll_frame.pack(fill="both", expand=True, padx=4, pady=4)
         self.scroll_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
 
-        # Empty state
-        self.empty_label = ctk.CTkLabel(
+        self.empty_lbl = ctk.CTkLabel(
             self.scroll_frame,
-            text="📭  No scans yet. Start scanning to build history!",
-            font=ctk.CTkFont(size=14),
-            text_color="#475569",
+            text="No scan events recorded yet.",
+            font=ctk.CTkFont(family="Tahoma", size=11),
+            text_color=WIN_MUTED,
         )
-        self.empty_label.grid(row=0, column=0, columnspan=5, pady=40)
+        self.empty_lbl.grid(row=0, column=0, columnspan=5, pady=40)
 
     def refresh(self):
-        """Refresh the history table with current data."""
-        for widget in self.scroll_frame.winfo_children():
-            widget.destroy()
+        """Refresh records from database."""
+        for w in self.scroll_frame.winfo_children():
+            w.destroy()
 
         history = get_history()
-
         if not history:
             ctk.CTkLabel(
                 self.scroll_frame,
-                text="📭  No scans yet. Start scanning to build history!",
-                font=ctk.CTkFont(size=14),
-                text_color="#475569",
+                text="No scan events recorded yet.",
+                font=ctk.CTkFont(family="Tahoma", size=11),
+                text_color=WIN_MUTED,
             ).grid(row=0, column=0, columnspan=5, pady=40)
             return
 
@@ -90,58 +94,43 @@ class HistoryFrame(ctk.CTkFrame):
             threat = record.get("threat_name") or "None"
             action = record["action"]
             timestamp = record["timestamp"]
-
-            # Style status
-            if status in ("CLEAN",):
-                status_color = "#ef4444"
-                status_icon = "🔴"
-            elif status in ("INFECTED", "DEMO THREAT"):
-                status_color = "#22c55e"
-                status_icon = "🟢"
-            else:
-                status_color = "#f59e0b"
-                status_icon = "⚠️"
-
-            # Filename
             fname = record["filename"]
-            if len(fname) > 24:
-                fname = fname[:21] + "..."
 
-            # Row container
-            row_frame = ctk.CTkFrame(self.scroll_frame, fg_color="#0d1117" if i % 2 == 0 else "#111827", corner_radius=6)
-            row_frame.pack(fill="x", pady=2)
+            # Alternating white / light grey
+            bg = WIN_WHITE if i % 2 == 0 else "#F7F6F0"
+
+            row_frame = ctk.CTkFrame(self.scroll_frame, fg_color=bg, corner_radius=0)
+            row_frame.pack(fill="x", pady=1)
             row_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
 
             ctk.CTkLabel(
                 row_frame, text=f"📄 {fname}",
-                font=ctk.CTkFont(size=12),
-                text_color="#e2e8f0",
-            ).grid(row=0, column=0, padx=10, pady=8, sticky="w")
+                font=ctk.CTkFont(family="Tahoma", size=10),
+                text_color=WIN_TEXT,
+            ).grid(row=0, column=0, padx=6, pady=3, sticky="w")
 
+            status_color = WIN_RED if status == "CLEAN" else (WIN_GREEN if status in ("INFECTED", "DEMO THREAT") else WIN_TEXT)
             ctk.CTkLabel(
-                row_frame,
-                text=f"{status_icon} {status}",
-                font=ctk.CTkFont(size=12, weight="bold"),
+                row_frame, text=status,
+                font=ctk.CTkFont(family="Tahoma", size=10, weight="bold"),
                 text_color=status_color,
-            ).grid(row=0, column=1, padx=10, pady=8, sticky="w")
+            ).grid(row=0, column=1, padx=6, pady=3, sticky="w")
 
-            threat_display = threat if len(threat) <= 22 else threat[:19] + "..."
             ctk.CTkLabel(
-                row_frame,
-                text=threat_display,
-                font=ctk.CTkFont(size=11),
-                text_color="#f59e0b" if threat != "None" else "#64748b",
-            ).grid(row=0, column=2, padx=10, pady=8, sticky="w")
+                row_frame, text=threat,
+                font=ctk.CTkFont(family="Tahoma", size=10),
+                text_color=WIN_TEXT,
+            ).grid(row=0, column=2, padx=6, pady=3, sticky="w")
 
-            action_color = "#ef4444" if "DESTROYED" in action or "DELETED" in action else ("#22c55e" if "PRESERVED" in action else "#94a3b8")
+            action_color = WIN_RED if "DESTROYED" in action or "DELETED" in action else (WIN_GREEN if "PRESERVED" in action else WIN_TEXT)
             ctk.CTkLabel(
                 row_frame, text=action,
-                font=ctk.CTkFont(size=11, weight="bold"),
+                font=ctk.CTkFont(family="Tahoma", size=10, weight="bold"),
                 text_color=action_color,
-            ).grid(row=0, column=3, padx=10, pady=8, sticky="w")
+            ).grid(row=0, column=3, padx=6, pady=3, sticky="w")
 
             ctk.CTkLabel(
                 row_frame, text=timestamp,
-                font=ctk.CTkFont(size=11),
-                text_color="#64748b",
-            ).grid(row=0, column=4, padx=10, pady=8, sticky="w")
+                font=ctk.CTkFont(family="Tahoma", size=10),
+                text_color=WIN_MUTED,
+            ).grid(row=0, column=4, padx=6, pady=3, sticky="w")

@@ -1,6 +1,6 @@
 """
-Anti-Antivirus — Statistics UI
-Displays fun statistics, scores, and progress bars.
+Anti-Antivirus — Statistics UI (Classic Windows Retro Edition)
+Displays performance scores styled like classic Windows System Properties / Performance Monitor.
 """
 
 import customtkinter as ctk
@@ -9,188 +9,149 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database import get_stats
+from ui.retro_widgets import (
+    WIN_BG, WIN_DARK_BG, WIN_WHITE, WIN_TEXT, WIN_MUTED,
+    WIN_BORDER, WIN_NAVY, WIN_BLUE, WIN_RED, WIN_GREEN
+)
 
 
 class StatsFrame(ctk.CTkFrame):
-    """Statistics tab — displays scores and metrics in card layout."""
+    """Statistics tab styled like classic Windows Performance Monitor."""
 
     def __init__(self, parent):
-        super().__init__(parent, fg_color="transparent")
+        super().__init__(parent, fg_color=WIN_BG, corner_radius=0)
         self._build_ui()
 
     def _build_ui(self):
-        """Build the statistics layout."""
-        # ── Header ──
-        header = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        header.pack(fill="x", padx=20, pady=(20, 10))
+        """Build the classic statistics layout."""
+        # ── Classic Blue Header ──
+        header = ctk.CTkFrame(self, fg_color=WIN_NAVY, height=36, corner_radius=0)
+        header.pack(fill="x", padx=8, pady=(8, 4))
+        header.pack_propagate(False)
 
         ctk.CTkLabel(
-            header, text="📊  Statistics & Scores",
-            font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#a855f7",
-        ).pack(padx=20, pady=(15, 3))
+            header, text="  📊 Windows De-fender — Performance & Inverted Metrics",
+            font=ctk.CTkFont(family="Tahoma", size=11, weight="bold"),
+            text_color=WIN_WHITE,
+            anchor="w",
+        ).pack(side="left", padx=6)
 
-        ctk.CTkLabel(
-            header, text="Measuring our spectacular failure at cybersecurity",
-            font=ctk.CTkFont(size=12),
-            text_color="#64748b",
-        ).pack(padx=20, pady=(0, 15))
+        # ── Main Container ──
+        container = ctk.CTkFrame(self, fg_color=WIN_BG, border_width=1, border_color=WIN_BORDER, corner_radius=2)
+        container.pack(fill="both", expand=True, padx=8, pady=4)
 
-        # ── Score Cards Row ──
-        scores_frame = ctk.CTkFrame(self, fg_color="transparent")
-        scores_frame.pack(fill="x", padx=20, pady=10)
-        scores_frame.grid_columnconfigure((0, 1), weight=1)
-
-        # Security Score Card
-        self.security_card = self._create_score_card(
-            scores_frame, "🔒", "Security Score",
-            "0%", "#ef4444",
-            "How effectively we protect your files\n(Spoiler: Not at all)",
-        )
-        self.security_card.grid(row=0, column=0, padx=8, pady=5, sticky="nsew")
+        # Score Cards Row
+        scores_row = ctk.CTkFrame(container, fg_color="transparent")
+        scores_row.pack(fill="x", padx=12, pady=12)
+        scores_row.grid_columnconfigure((0, 1), weight=1)
 
         # Uselessness Score Card
-        self.useless_card = self._create_score_card(
-            scores_frame, "🎯", "Uselessness Score",
-            "0%", "#22c55e",
-            "Our proudest achievement — pure, refined uselessness",
+        self.useless_card = self._create_score_box(
+            scores_row, "🎯", "Uselessness Metric", "100%", WIN_GREEN,
+            "100% when reverse actions are performed successfully."
         )
-        self.useless_card.grid(row=0, column=1, padx=8, pady=5, sticky="nsew")
+        self.useless_card.grid(row=0, column=0, padx=6, sticky="nsew")
 
-        # ── Detailed Stats ──
-        details_frame = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        details_frame.pack(fill="x", padx=20, pady=10)
+        # Security Score Card
+        self.security_card = self._create_score_box(
+            scores_row, "🔒", "Security Rating", "0%", WIN_RED,
+            "0% protection provided (by humorous design)."
+        )
+        self.security_card.grid(row=0, column=1, padx=6, sticky="nsew")
+
+        # Operational Metrics Box
+        metrics_box = ctk.CTkFrame(container, fg_color=WIN_DARK_BG, border_width=1, border_color=WIN_BORDER, corner_radius=2)
+        metrics_box.pack(fill="x", padx=12, pady=(4, 12))
 
         ctk.CTkLabel(
-            details_frame, text="Operational Metrics",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color="#e2e8f0",
-        ).pack(padx=20, pady=(15, 10))
+            metrics_box, text="System Operation Log Counters:",
+            font=ctk.CTkFont(family="Tahoma", size=10, weight="bold"),
+            text_color=WIN_TEXT,
+        ).pack(anchor="w", padx=12, pady=(8, 4))
 
-        # Stat rows
-        self.stats_container = ctk.CTkFrame(details_frame, fg_color="transparent")
-        self.stats_container.pack(fill="x", padx=20, pady=(0, 15))
-
-        self.stat_rows = {}
-        stat_defs = [
-            ("total", "📊", "Total Files Scanned", "#3b82f6"),
-            ("deleted", "🗑️", "Safe Files Destroyed", "#ef4444"),
-            ("preserved", "🏆", "Threats Preserved", "#22c55e"),
+        self.rows = {}
+        items = [
+            ("total", "📊  Total Files Evaluated:", "0"),
+            ("deleted", "💀  Safe Files Destroyed:", "0"),
+            ("preserved", "🏆  Malware / Threats Preserved:", "0"),
+            ("sessions", "🔄  Scan Sessions Completed:", "0"),
         ]
 
-        for key, icon, label, color in stat_defs:
-            row = self._create_stat_row(
-                self.stats_container, icon, label, "0", color,
+        for key, label, default_val in items:
+            row = ctk.CTkFrame(metrics_box, fg_color=WIN_BG, corner_radius=0)
+            row.pack(fill="x", padx=10, pady=2)
+
+            ctk.CTkLabel(
+                row, text=label,
+                font=ctk.CTkFont(family="Tahoma", size=10),
+                text_color=WIN_TEXT,
+            ).pack(side="left", padx=8, pady=4)
+
+            v_lbl = ctk.CTkLabel(
+                row, text=default_val,
+                font=ctk.CTkFont(family="Tahoma", size=10, weight="bold"),
+                text_color=WIN_NAVY,
             )
-            row.pack(fill="x", pady=3)
-            self.stat_rows[key] = row
+            v_lbl.pack(side="right", padx=8, pady=4)
+            self.rows[key] = v_lbl
 
-        # ── Fun Facts ──
-        facts_frame = ctk.CTkFrame(self, fg_color="#0d1117", corner_radius=15)
-        facts_frame.pack(fill="x", padx=20, pady=(10, 20))
+        # Fun Facts (Classic Tip of the Day style)
+        tip_box = ctk.CTkFrame(container, fg_color=WIN_WHITE, border_width=1, border_color=WIN_BORDER, corner_radius=2)
+        tip_box.pack(fill="both", expand=True, padx=12, pady=(0, 12))
 
         ctk.CTkLabel(
-            facts_frame, text="💡  Fun Facts",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color="#f59e0b",
-        ).pack(padx=20, pady=(15, 10))
+            tip_box, text="💡 Did You Know? (Tip of the Day):",
+            font=ctk.CTkFont(family="Tahoma", size=10, weight="bold"),
+            text_color=WIN_NAVY,
+        ).pack(anchor="w", padx=12, pady=(8, 4))
 
-        self.facts_label = ctk.CTkLabel(
-            facts_frame,
+        ctk.CTkLabel(
+            tip_box,
             text=(
-                "• This application has never prevented a single cyber attack\n"
-                "• Our threat museum has more appreciation for malware than any security firm\n"
-                "• Safe files live in constant fear of being scanned\n"
-                "• We've achieved a perfect record of 0 threats blocked\n"
-                "• Our antivirus engine runs on hopes, dreams, and reverse logic"
+                "• Windows De-fender has achieved a flawless record of 0 threats blocked.\n"
+                "• All preserved threats are housed with utmost care inside the Malware Museum.\n"
+                "• Harmless, clean files are moved to Deleted_Safe_Files for maximum inconvenience.\n"
+                "• Powered by Cisco ClamAV and backwards logic."
             ),
-            font=ctk.CTkFont(size=12),
-            text_color="#94a3b8",
+            font=ctk.CTkFont(family="Tahoma", size=9),
+            text_color=WIN_TEXT,
             justify="left",
-        )
-        self.facts_label.pack(padx=20, pady=(0, 15), anchor="w")
+        ).pack(anchor="w", padx=14, pady=(0, 8))
 
-    def _create_score_card(self, parent, icon, title, value, color, description):
-        """Create a large score card with progress bar."""
-        card = ctk.CTkFrame(parent, fg_color="#0d1117", corner_radius=15)
-
-        ctk.CTkLabel(
-            card, text=icon,
-            font=ctk.CTkFont(size=36),
-        ).pack(pady=(20, 5))
+    def _create_score_box(self, parent, icon, title, val, color, desc):
+        """Create a classic 3D score box."""
+        box = ctk.CTkFrame(parent, fg_color=WIN_DARK_BG, border_width=1, border_color=WIN_BORDER, corner_radius=2)
 
         ctk.CTkLabel(
-            card, text=title,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#94a3b8",
-        ).pack()
+            box, text=f"{icon}  {title}",
+            font=ctk.CTkFont(family="Tahoma", size=11, weight="bold"),
+            text_color=WIN_TEXT,
+        ).pack(anchor="w", padx=10, pady=(8, 2))
 
-        value_label = ctk.CTkLabel(
-            card, text=value,
-            font=ctk.CTkFont(size=42, weight="bold"),
+        v_lbl = ctk.CTkLabel(
+            box, text=val,
+            font=ctk.CTkFont(family="Tahoma", size=24, weight="bold"),
             text_color=color,
         )
-        value_label.pack(pady=5)
-        card.value_label = value_label
-
-        progress = ctk.CTkProgressBar(
-            card, height=10, corner_radius=5,
-            progress_color=color, fg_color="#1e293b",
-            width=200,
-        )
-        progress.pack(pady=5)
-        progress.set(0)
-        card.progress = progress
+        v_lbl.pack(anchor="w", padx=12, pady=2)
+        box.value_label = v_lbl
 
         ctk.CTkLabel(
-            card, text=description,
-            font=ctk.CTkFont(size=10),
-            text_color="#475569",
-            justify="center",
-        ).pack(padx=15, pady=(5, 20))
+            box, text=desc,
+            font=ctk.CTkFont(family="Tahoma", size=9),
+            text_color=WIN_MUTED,
+        ).pack(anchor="w", padx=10, pady=(0, 8))
 
-        return card
-
-    def _create_stat_row(self, parent, icon, label, value, color):
-        """Create a single stat row with icon, label, and value."""
-        row = ctk.CTkFrame(parent, fg_color="#111827", corner_radius=8)
-
-        ctk.CTkLabel(
-            row, text=f"{icon}  {label}",
-            font=ctk.CTkFont(size=13),
-            text_color="#e2e8f0",
-        ).pack(side="left", padx=15, pady=10)
-
-        value_label = ctk.CTkLabel(
-            row, text=value,
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=color,
-        )
-        value_label.pack(side="right", padx=15, pady=10)
-        row.value_label = value_label
-
-        return row
+        return box
 
     def refresh(self):
-        """Refresh all statistics from the database."""
+        """Refresh statistics values from database."""
         stats = get_stats()
 
-        # Update score cards
-        sec_score = stats["security_score"]
-        self.security_card.value_label.configure(text=f"{sec_score}%")
-        self.security_card.progress.set(sec_score / 100)
+        self.useless_card.value_label.configure(text=f"{stats['uselessness_score']}%")
+        self.security_card.value_label.configure(text=f"{stats['security_score']}%")
 
-        use_score = stats["uselessness_score"]
-        self.useless_card.value_label.configure(text=f"{use_score}%")
-        self.useless_card.progress.set(use_score / 100)
-
-        # Update stat rows
-        self.stat_rows["total"].value_label.configure(
-            text=str(stats["total_scanned"])
-        )
-        self.stat_rows["deleted"].value_label.configure(
-            text=str(stats["clean_deleted"])
-        )
-        self.stat_rows["preserved"].value_label.configure(
-            text=str(stats["threats_preserved"])
-        )
+        self.rows["total"].configure(text=str(stats["total_scanned"]))
+        self.rows["deleted"].configure(text=str(stats["clean_deleted"]))
+        self.rows["preserved"].configure(text=str(stats["threats_preserved"]))
+        self.rows["sessions"].configure(text=str(stats["scan_sessions"]))
