@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('ui', 'ui')],
+    datas=[('ui', 'ui'), ('data/clamav_db', 'data/clamav_db')],
     hiddenimports=['ui', 'ui.app', 'ui.dashboard', 'ui.scanner_view', 'ui.museum', 'ui.history', 'ui.stats', 'database', 'scanner', 'file_manager', 'demo_files'],
     hookspath=[],
     hooksconfig={},
