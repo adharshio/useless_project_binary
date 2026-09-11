@@ -207,6 +207,9 @@ class AntiAntivirusApp(ctk.CTk):
             messagebox.showerror("Error", f"Could not create demo files:\n{e}")
 
     def _on_scan_complete(self):
-        """Called after a scan is completed — refresh stats."""
-        if "dashboard" in self.frames:
-            self.frames["dashboard"].refresh_stats()
+        """Called after a scan is completed — refresh stats across all views."""
+        for frame in self.frames.values():
+            if hasattr(frame, "refresh"):
+                frame.refresh()
+            if hasattr(frame, "refresh_stats"):
+                frame.refresh_stats()

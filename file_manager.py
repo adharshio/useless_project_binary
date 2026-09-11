@@ -1,33 +1,41 @@
 """
 Anti-Antivirus — File Manager Module
-Handles safe file operations: moving files to Deleted_Safe_Files or Threat_Museum.
+Handles safe file operations: moving files to deleted_safe_files or threat_museum.
 
 SAFETY:
-- NEVER permanently deletes any file.
-- NEVER executes any file.
-- Only moves/copies files to designated directories.
+- NEVER permanently deletes any file during development.
+- NEVER executes or opens any scanned/infected file.
+- Handles duplicate filenames safely (test.txt, test_1.txt, test_2.txt).
+- Never overwrites existing files.
+- Operates strictly within controlled application data directories.
 """
 
 import shutil
+import os
 from pathlib import Path
-from datetime import datetime
 
-# Designated directories
+# Application directories
 DATA_DIR = Path(__file__).parent / "data"
-DELETED_DIR = DATA_DIR / "Deleted_Safe_Files"
-MUSEUM_DIR = DATA_DIR / "Threat_Museum"
+DELETED_DIR = DATA_DIR / "deleted_safe_files"
+MUSEUM_DIR = DATA_DIR / "threat_museum"
+
+# Also support legacy casing if folder already exists
+LEGACY_DELETED_DIR = DATA_DIR / "Deleted_Safe_Files"
+LEGACY_MUSEUM_DIR = DATA_DIR / "Threat_Museum"
 
 
 def ensure_directories():
     """Create all required data directories if they don't exist."""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     DELETED_DIR.mkdir(parents=True, exist_ok=True)
     MUSEUM_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _unique_name(directory: Path, filename: str) -> Path:
     """
-    Generate a unique filename in the target directory to avoid overwrites.
-    Appends a timestamp if the file already exists.
+    Generate a unique target path in directory to avoid overwriting existing files.
+    Sequence format:
+        test.txt -> test_1.txt -> test_2.txt ...
     """
     target = directory / filename
     if not target.exists():
@@ -35,14 +43,22 @@ def _unique_name(directory: Path, filename: str) -> Path:
 
     stem = Path(filename).stem
     suffix = Path(filename).suffix
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    new_name = f"{stem}_{timestamp}{suffix}"
-    return directory / new_name
+    counter = 1
+    while True:
+        candidate = directory / f"{stem}_{counter}{suffix}"
+        if not candidate.exists():
+            return candidate
+        counter += 1
 
 
 def move_to_deleted(filepath: str) -> str:
     """
-    Move a 'clean' file to the Deleted_Safe_Files directory.
+    Move a 'clean' file to the deleted_safe_files directory.
+
+    SAFETY:
+    - Never permanently deletes the file.
+    - Resolves collisions with unique numbered suffix.
+    - Never executes the file.
 
     Args:
         filepath: Path to the file to move.
@@ -51,49 +67,62 @@ def move_to_deleted(filepath: str) -> str:
         The destination path as a string.
 
     Raises:
-        FileNotFoundError: If the source file doesn't exist.
+        FileNotFoundError: If the source file does not exist.
+        OSError: If the file is inaccessible or locked.
     """
     ensure_directories()
-    source = Path(filepath)
+    source = Path(filepath).resolve()
 
-    if not source.exists():
+    if not source.is_file():
         raise FileNotFoundError(f"File not found: {filepath}")
 
-    dest = _unique_name(DELETED_DIR, source.name)
+    dest_dir = DELETED_DIR if DELETED_DIR.exists() else LEGACY_DELETED_DIR
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = _unique_name(dest_dir, source.name)
     shutil.move(str(source), str(dest))
     return str(dest)
 
 
 def move_to_museum(filepath: str) -> str:
     """
-    Copy a 'demo threat' file to the Threat_Museum directory.
-    Uses copy (not move) so the original demo file can be reused.
+    Safely preserve an 'infected' file inside the threat_museum directory.
+
+    SAFETY:
+    - Does NOT execute or open the file.
+    - Resolves collisions with unique numbered suffix.
+    - Never overwrites existing museum files.
 
     Args:
-        filepath: Path to the file to copy.
+        filepath: Path to the file to preserve.
 
     Returns:
         The destination path as a string.
 
     Raises:
-        FileNotFoundError: If the source file doesn't exist.
+        FileNotFoundError: If the source file does not exist.
+        OSError: If the file is inaccessible or locked.
     """
     ensure_directories()
-    source = Path(filepath)
+    source = Path(filepath).resolve()
 
-    if not source.exists():
+    if not source.is_file():
         raise FileNotFoundError(f"File not found: {filepath}")
 
-    dest = _unique_name(MUSEUM_DIR, source.name)
-    shutil.copy2(str(source), str(dest))
+    dest_dir = MUSEUM_DIR if MUSEUM_DIR.exists() else LEGACY_MUSEUM_DIR
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = _unique_name(dest_dir, source.name)
+    # Move the file into museum so it is quarantined in the controlled area
+    shutil.move(str(source), str(dest))
     return str(dest)
 
 
 def get_deleted_dir() -> Path:
-    """Return the Deleted_Safe_Files directory path."""
-    return DELETED_DIR
+    """Return the deleted_safe_files directory path."""
+    return DELETED_DIR if DELETED_DIR.exists() else LEGACY_DELETED_DIR
 
 
 def get_museum_dir() -> Path:
-    """Return the Threat_Museum directory path."""
-    return MUSEUM_DIR
+    """Return the threat_museum directory path."""
+    return MUSEUM_DIR if MUSEUM_DIR.exists() else LEGACY_MUSEUM_DIR
