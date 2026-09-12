@@ -245,7 +245,7 @@ class ScannerViewFrame(ctk.CTkFrame):
 
         self.banner_title = ctk.CTkLabel(
             banner,
-            text="  📋 Scan Action Log & Retro Terminal",
+            text="  📋 Scan Action Log",
             font=ctk.CTkFont(family="Tahoma", size=10, weight="bold"),
             text_color=WIN_TEXT,
             anchor="w",
