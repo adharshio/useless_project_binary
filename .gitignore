@@ -22,3 +22,4 @@ data/Deleted_Safe_Files/
 data/Threat_Museum/
 data/demo_samples/
 data/*.db
+dist/data/

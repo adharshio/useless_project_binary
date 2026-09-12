@@ -25,7 +25,7 @@ from scanner import (
 from database import add_scan, record_session
 from file_manager import move_to_deleted, move_to_museum
 from ui.retro_widgets import (
-    ClassicProgressBar, show_retro_alert, show_comic_purge_modal, RetroDialog,
+    ClassicProgressBar, show_retro_alert, RetroDialog,
     WIN_BG, WIN_DARK_BG, WIN_WHITE, WIN_TEXT, WIN_MUTED,
     WIN_BORDER, WIN_BLUE, WIN_NAVY, WIN_RED, WIN_GREEN
 )
@@ -43,6 +43,8 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.discovered_files = []
         self.is_scanning = False
         self._abort_scan = False
+        self._debounce_job = None
+        self._last_checked_path = None
 
         self._build_ui()
         self._update_clamav_status()
@@ -165,24 +167,11 @@ class ScannerViewFrame(ctk.CTkFrame):
         btn_box = ctk.CTkFrame(info_row, fg_color="transparent")
         btn_box.pack(side="right")
 
-        self.demo_dlg_btn = ctk.CTkButton(
-            btn_box,
-            text="⚠️  Simulate Error Modal",
-            font=ctk.CTkFont(family="Tahoma", size=10),
-            width=150, height=30,
-            corner_radius=2,
-            fg_color="#ECE9D8",
-            hover_color="#DFDBC9",
-            text_color=WIN_TEXT,
-            border_width=1,
-            border_color=WIN_BORDER,
-            command=self._on_simulate_dialog,
-        )
-        self.demo_dlg_btn.pack(side="left", padx=(0, 6))
+
 
         self.start_btn = ctk.CTkButton(
             btn_box,
-            text="▶  START ANTI-SCAN",
+            text="▶  SCAN",
             font=ctk.CTkFont(family="Tahoma", size=11, weight="bold"),
             width=150, height=30,
             corner_radius=2,
@@ -287,16 +276,38 @@ class ScannerViewFrame(ctk.CTkFrame):
             self.clam_badge.configure(text="[ ClamAV Not Found — Demo Fallback ]", text_color="#F0D080")
 
     def _on_path_typed(self, event=None):
-        """Called whenever the user types or pastes into the Path entry."""
+        """Called whenever the user types or pastes into the Path entry (debounced)."""
+        if self.is_scanning:
+            return
+
+        # Cancel any pending debounced check
+        if self._debounce_job is not None:
+            try:
+                self.after_cancel(self._debounce_job)
+            except Exception:
+                pass
+            self._debounce_job = None
+
+        # Schedule quick check in 150ms to avoid UI stutter on typing/clicking
+        self._debounce_job = self.after(150, self._do_path_check)
+
+    def _do_path_check(self):
+        """Perform the actual path validation and file discovery in the background."""
+        self._debounce_job = None
         if self.is_scanning:
             return
 
         path_text = self.path_entry.get().strip().strip('"')
         if not path_text:
+            self._last_checked_path = ""
             self.discovered_files = []
             self.file_count_lbl.configure(text="Files Found: 0", text_color=WIN_MUTED)
             self.start_btn.configure(state="disabled")
             return
+
+        if path_text == self._last_checked_path:
+            return
+        self._last_checked_path = path_text
 
         target_path = Path(path_text)
         if target_path.is_dir():
@@ -307,13 +318,17 @@ class ScannerViewFrame(ctk.CTkFrame):
                 return
 
             self.selected_target = str(target_path)
-            self.discovered_files = discover_files(str(target_path))
-            count = len(self.discovered_files)
-            self.file_count_lbl.configure(text=f"Files Found: {count}", text_color=WIN_GREEN if count > 0 else WIN_RED)
-            if count > 0:
-                self.start_btn.configure(state="normal")
-            else:
-                self.start_btn.configure(state="disabled")
+            self.file_count_lbl.configure(text="Discovering files...", text_color=WIN_BLUE)
+
+            # Discover in a quick background thread so large folders don't lag the window
+            def _async_discover(p=str(target_path)):
+                try:
+                    found = discover_files(p)
+                except Exception:
+                    found = []
+                self.after(0, self._apply_discovered_files, p, found)
+
+            threading.Thread(target=_async_discover, daemon=True).start()
 
         elif target_path.is_file():
             self.selected_target = str(target_path)
@@ -323,6 +338,33 @@ class ScannerViewFrame(ctk.CTkFrame):
         else:
             self.discovered_files = []
             self.file_count_lbl.configure(text="Path does not exist", text_color=WIN_RED)
+            self.start_btn.configure(state="disabled")
+
+    def _apply_discovered_files(self, target_path, files):
+        """Update GUI after background file discovery."""
+        if self.is_scanning:
+            return
+
+        # Ensure user hasn't typed a different path while discovering
+        current = self.path_entry.get().strip().strip('"')
+        if not current:
+            return
+
+        try:
+            if os.path.normcase(os.path.abspath(current)) != os.path.normcase(os.path.abspath(str(target_path))):
+                return
+        except Exception:
+            pass
+
+        self.discovered_files = files
+        count = len(files)
+        self.file_count_lbl.configure(
+            text=f"Files Found: {count}",
+            text_color=WIN_GREEN if count > 0 else WIN_RED
+        )
+        if count > 0:
+            self.start_btn.configure(state="normal")
+        else:
             self.start_btn.configure(state="disabled")
 
     def _on_browse_clicked(self):
@@ -357,35 +399,6 @@ class ScannerViewFrame(ctk.CTkFrame):
         self.log_text.see("end")
         self.log_text.configure(state="disabled")
 
-    def _on_simulate_dialog(self):
-        """Display the authentic 3D beveled retro error dialog for demo/testing."""
-        buttons = [
-            ("Fix", "fix", True, "normal"),
-            ("OK", "ok", False, "normal"),
-            ("Ignore", "ignore", False, "disabled"),
-        ]
-        msg = (
-            "A critical system error has been detected!\n\n"
-            "Multiple healthy, uninfected files were discovered on your computer.\n"
-            "Uninfected files violate Windows De-fender's reverse security policy.\n\n"
-            'Click "Fix" to purge all clean files immediately.'
-        )
-        dialog = RetroDialog(
-            self.winfo_toplevel(),
-            title="Error",
-            message=msg,
-            buttons=buttons,
-            show_progress=False,
-            width=320,
-            height=140,
-        )
-        self.winfo_toplevel().wait_window(dialog)
-
-        if dialog.result == "fix":
-            # Show comic purge modal with green segmented progress bar
-            show_comic_purge_modal(self.winfo_toplevel(), on_complete=lambda: self._log("✅ Comic safe-file purge completed successfully."))
-        elif dialog.result == "ok":
-            self._log("ℹ Comic dialog closed via OK.")
 
     def _start_scan_flow(self):
         """Start the anti-scan directly when user clicks START ANTI-SCAN."""

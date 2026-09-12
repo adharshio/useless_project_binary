@@ -498,11 +498,11 @@ class RetroSegmentedProgressBar(tk.Canvas):
                     self.create_line(x1, y2 - 1, x2, y2 - 1, fill=self.chunk_shadow)
                     self.create_line(x2 - 1, y1, x2 - 1, y2, fill=self.chunk_shadow)
 
-        self.marquee_pos += 6
+        self.marquee_pos += 8
         if self.marquee_pos > w:
             self.marquee_pos = - (num_blocks * step)
 
-        self.marquee_timer = self.after(25, self._animate_marquee)
+        self.marquee_timer = self.after(40, self._animate_marquee)
 
 
 class ClassicProgressBar(RetroSegmentedProgressBar):
@@ -693,12 +693,20 @@ class RetroDialog(tk.Toplevel):
         self.result = action
         if self.pbar:
             self.pbar.stop_marquee()
+        try:
+            self.grab_release()
+        except Exception:
+            pass
         self.destroy()
 
     def _on_close(self):
         self.result = "cancel"
         if self.pbar:
             self.pbar.stop_marquee()
+        try:
+            self.grab_release()
+        except Exception:
+            pass
         self.destroy()
 
 
@@ -838,11 +846,19 @@ class RetroProgressDialog(tk.Toplevel):
             self.action_btn.configure_button(text="OK", state="normal", command=self._on_done)
 
     def _on_done(self):
+        try:
+            self.grab_release()
+        except Exception:
+            pass
         self.destroy()
         if self.on_complete:
             self.on_complete()
 
     def _on_close(self):
+        try:
+            self.grab_release()
+        except Exception:
+            pass
         self.destroy()
 
 

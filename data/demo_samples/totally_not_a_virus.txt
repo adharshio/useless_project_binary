@@ -1,6 +1,0 @@
-THIS IS A DEMO FILE — NOT A REAL VIRUS
-=========================================
-If you're reading this, congratulations!
-You found the most dangerous text file ever created.
-It does absolutely nothing malicious.
-Threat Level: Imaginary

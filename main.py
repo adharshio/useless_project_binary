@@ -11,9 +11,11 @@ A humorous "Useless Project" that does the opposite of an antivirus:
 Technology: Python, CustomTkinter, SQLite
 """
 
+import os
+os.environ.setdefault("PYTHONUTF8", "1")
+
 import customtkinter as ctk
 import sys
-import os
 
 # Ensure the project root is in the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

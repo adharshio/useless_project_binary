@@ -84,7 +84,7 @@ class AntiAntivirusApp(ctk.CTk):
         ).pack(side="left", padx=6)
 
         ctk.CTkLabel(
-            brand_bar, text="⚠️ Competition Edition  |  ClamAV Integrated  ",
+            brand_bar, text="ClamAV Integrated  ",
             font=ctk.CTkFont(family="Tahoma", size=9),
             text_color="#A6CAF0",
         ).pack(side="right", padx=8)
