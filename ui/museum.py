@@ -20,6 +20,7 @@ class MuseumFrame(ctk.CTkFrame):
 
     def __init__(self, parent):
         super().__init__(parent, fg_color=WIN_BG, corner_radius=0)
+        self._last_museum_hash = None
         self._build_ui()
 
     def _build_ui(self):
@@ -68,11 +69,16 @@ class MuseumFrame(ctk.CTkFrame):
         self.empty_lbl.pack(pady=40)
 
     def refresh(self):
-        """Refresh museum items from database."""
+        """Refresh museum items from database (cached to avoid UI lag)."""
+        items = get_museum_items()
+        museum_sig = (len(items), items[0]["id"] if items else 0)
+        if museum_sig == self._last_museum_hash:
+            return
+        self._last_museum_hash = museum_sig
+
         for w in self.scroll_frame.winfo_children():
             w.destroy()
 
-        items = get_museum_items()
         self.count_lbl.configure(text=f"Exhibits Preserved: {len(items)}")
 
         if not items:

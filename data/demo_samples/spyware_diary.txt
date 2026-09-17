@@ -1,6 +1,0 @@
-THIS IS A DEMO FILE — NOT REAL SPYWARE
-=========================================
-Day 1: Watched the user type 'hello'.
-Day 2: User watched cat videos for 6 hours.
-Day 3: I'm starting to enjoy the cat videos too.
-Data exfiltrated: 0 bytes

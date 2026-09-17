@@ -23,5 +23,10 @@ data/Threat_Museum/
 data/demo_samples/
 data/*.db
 
+
 *.exe
 Windows-De-fender.exe.tar.gz
+=======
+dist/data/
+
+

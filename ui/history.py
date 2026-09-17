@@ -21,6 +21,7 @@ class HistoryFrame(ctk.CTkFrame):
 
     def __init__(self, parent):
         super().__init__(parent, fg_color=WIN_BG, corner_radius=0)
+        self._last_history_hash = None
         self._build_ui()
 
     def _build_ui(self):
@@ -73,11 +74,16 @@ class HistoryFrame(ctk.CTkFrame):
         self.empty_lbl.grid(row=0, column=0, columnspan=5, pady=40)
 
     def refresh(self):
-        """Refresh records from database."""
+        """Refresh records from database (cached to avoid UI lag)."""
+        history = get_history()
+        history_sig = (len(history), history[0]["id"] if history else 0)
+        if history_sig == self._last_history_hash:
+            return
+        self._last_history_hash = history_sig
+
         for w in self.scroll_frame.winfo_children():
             w.destroy()
 
-        history = get_history()
         if not history:
             ctk.CTkLabel(
                 self.scroll_frame,

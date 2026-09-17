@@ -13,7 +13,7 @@ from database import get_stats
 from ui.retro_widgets import (
     WIN_BG, WIN_DARK_BG, WIN_WHITE, WIN_TEXT, WIN_MUTED,
     WIN_BORDER, WIN_BLUE, WIN_NAVY, WIN_RED, WIN_GREEN,
-    show_retro_alert, show_comic_purge_modal, RetroDialog
+    show_retro_alert,
 )
 
 
@@ -171,20 +171,7 @@ class DashboardFrame(ctk.CTkFrame):
         )
         self.gen_btn.pack(side="left", padx=(0, 8))
 
-        self.purge_btn = ctk.CTkButton(
-            action_row,
-            text="⚡  Emergency Safe-File Purge...",
-            font=ctk.CTkFont(family="Tahoma", size=11, weight="bold"),
-            width=210, height=32,
-            corner_radius=2,
-            fg_color="#ECE9D8",
-            hover_color="#DFDBC9",
-            text_color=WIN_RED,
-            border_width=1,
-            border_color=WIN_RED,
-            command=self._on_purge_click,
-        )
-        self.purge_btn.pack(side="left")
+
 
     def _create_card(self, parent, icon, label, val, color):
         """Create a classic Windows beveled card."""
@@ -231,29 +218,4 @@ class DashboardFrame(ctk.CTkFrame):
         if self.generate_callback:
             self.generate_callback()
 
-    def _on_purge_click(self):
-        """Trigger retro 3D error modal and comic purge flow from dashboard."""
-        buttons = [
-            ("Fix", "fix", True, "normal"),
-            ("Cancel", "cancel", False, "normal"),
-            ("Ignore", "ignore", False, "disabled"),
-        ]
-        msg = (
-            "System Integrity Warning!\n\n"
-            "Dangerous levels of system health and clean data have been detected.\n"
-            "This directly impairs our 0% security guarantee.\n\n"
-            'Click "Fix" to execute an emergency safe-file purge.'
-        )
-        dialog = RetroDialog(
-            self.winfo_toplevel(),
-            title="Error",
-            message=msg,
-            buttons=buttons,
-            show_progress=False,
-            width=320,
-            height=140,
-        )
-        self.winfo_toplevel().wait_window(dialog)
 
-        if dialog.result == "fix":
-            show_comic_purge_modal(self.winfo_toplevel(), on_complete=self.refresh_stats)
